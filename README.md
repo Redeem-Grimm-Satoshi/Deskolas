@@ -74,9 +74,10 @@ npx supabase gen types typescript --local > types/database.ts
 
 ## Deploy
 
-Vercel builds every pull request as a preview and `main` as production. The root
-directory of the Vercel project is this `deskolas/` folder. Branch protection on
-`main` requires green CI and one approving review.
+Vercel builds every pull request as a preview and `main` as production. This
+app is the repository root, so the Vercel project root directory is the default
+(no subfolder). Branch protection on `main` requires green CI and one approving
+review.
 
 ## Documentation
 
