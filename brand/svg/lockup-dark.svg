@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="212" height="48" viewBox="0 0 212 48">
+  <g transform="translate(0,4)">
+    <rect width="40" height="40" rx="11" fill="#0EA5E9"></rect>
+    <path transform="translate(5,5) scale(1.25)" fill-rule="evenodd" clip-rule="evenodd" d="M5 4 H11 A8 8 0 0 1 11 20 H5 Z M8 8 V16 H10 A4 4 0 0 0 10 8 Z" fill="#ffffff"></path>
+  </g>
+  <text x="52" y="24" dominant-baseline="central" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="27" letter-spacing="-0.5" fill="#F4F4F5">Deskolas</text>
+</svg>
