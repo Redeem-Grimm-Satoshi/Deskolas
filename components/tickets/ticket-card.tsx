@@ -4,21 +4,13 @@ import { Avatar } from "@/components/ui/avatar";
 import { PriorityLabel } from "@/components/ui/priority-label";
 import { StatusPill } from "@/components/ui/status-pill";
 import { focusRing } from "@/lib/styles";
+import { SPINE_CLASS } from "@/lib/ticket-view";
 import type {
   TicketCategory,
   TicketPriority,
   TicketStatus,
 } from "@/lib/tickets";
 import { cn } from "@/lib/utils";
-
-// Spine color is derived from status so the queue reads its whole state from
-// the spine colors alone.
-const spineColor: Record<TicketStatus, string> = {
-  new: "bg-st-new",
-  in_progress: "bg-st-progress",
-  resolved: "bg-st-resolved",
-  closed: "bg-st-closed",
-};
 
 type Assignee = { name: string; src?: string | null };
 
@@ -65,7 +57,7 @@ export function TicketCard({
     >
       {/* Status spine: an inset bar, never a border on the rounded card. */}
       <span
-        className={cn("w-1 shrink-0 rounded-full", spineColor[status])}
+        className={cn("w-1 shrink-0 rounded-full", SPINE_CLASS[status])}
         aria-hidden
       />
 
