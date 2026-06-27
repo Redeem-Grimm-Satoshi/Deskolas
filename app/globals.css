@@ -8,13 +8,18 @@
 */
 @custom-variant light (&:where(.light, .light *));
 
-:root {
+/* Dark is the base and is also reachable as an explicit `.dark` class, so a
+   subtree can force either theme (the component showcase shows both at once). */
+:root,
+.dark {
   /* Accent: the only chromatic family. Fixed across themes except text/tint. */
   --accent: #0ea5e9;
   --accent-hover: #0284c7;
   --accent-pressed: #0369a1;
   --accent-text: #38bdf8;
   --accent-tint: rgba(14, 165, 233, 0.12);
+  /* Faint accent wash behind an unread notification row. */
+  --accent-wash: rgba(14, 165, 233, 0.06);
 
   /* Neutrals (zinc): two surfaces, one hairline. */
   --bg: #09090b;
@@ -46,6 +51,16 @@
   --prio-medium: #d97706;
   --prio-high: #fb7185;
 
+  /* Error/danger border, fixed rose in both themes. */
+  --danger: #e11d48;
+
+  /* Neutral fill behind avatar initials. */
+  --avatar-surface: #27272a;
+  /* Subtle fill for ghost and secondary hover (a surface step, not a glow). */
+  --hover-surface: rgba(255, 255, 255, 0.05);
+  /* Soft 3px ring on a focused field, distinct from the 4px control ring. */
+  --input-focus-ring: rgba(14, 165, 233, 0.15);
+
   /* Floating-layer shadow: neutral, never colored. */
   --shadow-floating: 0 8px 24px rgba(0, 0, 0, 0.4);
   --scrim: rgba(0, 0, 0, 0.55);
@@ -74,6 +89,9 @@
 
   --prio-high: #e11d48;
 
+  --avatar-surface: #f4f4f5;
+  --hover-surface: #f4f4f5;
+
   --shadow-floating: 0 8px 24px rgba(0, 0, 0, 0.1);
   --scrim: rgba(24, 24, 27, 0.3);
 }
@@ -84,6 +102,7 @@
   --color-accent-pressed: var(--accent-pressed);
   --color-accent-text: var(--accent-text);
   --color-accent-tint: var(--accent-tint);
+  --color-accent-wash: var(--accent-wash);
 
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -110,6 +129,12 @@
   --color-prio-low: var(--prio-low);
   --color-prio-medium: var(--prio-medium);
   --color-prio-high: var(--prio-high);
+  --color-danger: var(--danger);
+
+  --color-avatar-surface: var(--avatar-surface);
+  --color-hover-surface: var(--hover-surface);
+
+  --shadow-floating: var(--shadow-floating);
 
   /* Nested radius steps down: card 12 contains control 8. */
   --radius-control: 8px;
@@ -147,6 +172,28 @@
   --text-overline--line-height: 0.875rem;
   --text-overline--letter-spacing: 0.06em;
   --text-overline--font-weight: 500;
+}
+
+/* Floating layers fade and lift in. Panels confirm a change, they do not
+   perform: short, ease-out, transform and opacity only. */
+@keyframes layer-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @layer base {
