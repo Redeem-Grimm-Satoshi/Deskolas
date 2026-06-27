@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+/*
+  Theme is swapped by toggling the `light` class on <html>. Dark is the base
+  (the default), so the semantic tokens below carry dark values on :root and
+  the `.light` block overrides only what changes. Components read the semantic
+  tokens, never the raw palette, so a screen themes correctly in both modes.
+*/
+@custom-variant light (&:where(.light, .light *));
+
+:root {
+  /* Accent: the only chromatic family. Fixed across themes except text/tint. */
+  --accent: #0ea5e9;
+  --accent-hover: #0284c7;
+  --accent-pressed: #0369a1;
+  --accent-text: #38bdf8;
+  --accent-tint: rgba(14, 165, 233, 0.12);
+
+  /* Neutrals (zinc): two surfaces, one hairline. */
+  --bg: #09090b;
+  --surface: #18181b;
+  --border: #27272a;
+  --border-strong: #3f3f46;
+  --text: #f4f4f5;
+  --text-2: #a1a1aa;
+  --text-muted: #71717a;
+
+  /* Status spines: shared across themes (color carries the queue scan). */
+  --st-new: #f59e0b;
+  --st-progress: #0ea5e9;
+  --st-resolved: #10b981;
+  --st-closed: #a1a1aa;
+
+  /* Status pills: tint background plus readable label, per theme. */
+  --pill-new-bg: rgba(245, 158, 11, 0.15);
+  --pill-new-text: #fbbf24;
+  --pill-progress-bg: rgba(14, 165, 233, 0.15);
+  --pill-progress-text: #38bdf8;
+  --pill-resolved-bg: rgba(16, 185, 129, 0.15);
+  --pill-resolved-text: #34d399;
+  --pill-closed-bg: rgba(161, 161, 170, 0.15);
+  --pill-closed-text: #a1a1aa;
+
+  /* Priority: a whisper. Dot plus label share the color. */
+  --prio-low: #71717a;
+  --prio-medium: #d97706;
+  --prio-high: #fb7185;
+
+  /* Floating-layer shadow: neutral, never colored. */
+  --shadow-floating: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --scrim: rgba(0, 0, 0, 0.55);
+}
+
+.light {
+  --accent-text: #0369a1;
+  --accent-tint: #f0f9ff;
+
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --border: #e4e4e7;
+  --border-strong: #d4d4d8;
+  --text: #18181b;
+  --text-2: #52525b;
+  --text-muted: #a1a1aa;
+
+  --pill-new-bg: #fffbeb;
+  --pill-new-text: #b45309;
+  --pill-progress-bg: #f0f9ff;
+  --pill-progress-text: #0369a1;
+  --pill-resolved-bg: #ecfdf5;
+  --pill-resolved-text: #047857;
+  --pill-closed-bg: #f4f4f5;
+  --pill-closed-text: #52525b;
+
+  --prio-high: #e11d48;
+
+  --shadow-floating: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --scrim: rgba(24, 24, 27, 0.3);
+}
+
+@theme inline {
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-pressed: var(--accent-pressed);
+  --color-accent-text: var(--accent-text);
+  --color-accent-tint: var(--accent-tint);
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-muted: var(--text-muted);
+
+  --color-st-new: var(--st-new);
+  --color-st-progress: var(--st-progress);
+  --color-st-resolved: var(--st-resolved);
+  --color-st-closed: var(--st-closed);
+
+  --color-pill-new-bg: var(--pill-new-bg);
+  --color-pill-new-text: var(--pill-new-text);
+  --color-pill-progress-bg: var(--pill-progress-bg);
+  --color-pill-progress-text: var(--pill-progress-text);
+  --color-pill-resolved-bg: var(--pill-resolved-bg);
+  --color-pill-resolved-text: var(--pill-resolved-text);
+  --color-pill-closed-bg: var(--pill-closed-bg);
+  --color-pill-closed-text: var(--pill-closed-text);
+
+  --color-prio-low: var(--prio-low);
+  --color-prio-medium: var(--prio-medium);
+  --color-prio-high: var(--prio-high);
+
+  /* Nested radius steps down: card 12 contains control 8. */
+  --radius-control: 8px;
+  --radius-card: 12px;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  /* Type scale. Tracking tightens as type grows, opens on tiny uppercase. */
+  --text-display: 1.875rem;
+  --text-display--line-height: 2.25rem;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 600;
+
+  --text-title: 1.25rem;
+  --text-title--line-height: 1.75rem;
+  --text-title--letter-spacing: -0.01em;
+  --text-title--font-weight: 600;
+
+  --text-heading: 1rem;
+  --text-heading--line-height: 1.5rem;
+  --text-heading--letter-spacing: -0.005em;
+  --text-heading--font-weight: 600;
+
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.25rem;
+
+  --text-small: 0.8125rem;
+  --text-small--line-height: 1.125rem;
+
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+
+  --text-overline: 0.6875rem;
+  --text-overline--line-height: 0.875rem;
+  --text-overline--letter-spacing: 0.06em;
+  --text-overline--font-weight: 500;
+}
+
+@layer base {
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Accent owns text selection, part of its budget. */
+  ::selection {
+    background-color: var(--accent-tint);
+  }
+}

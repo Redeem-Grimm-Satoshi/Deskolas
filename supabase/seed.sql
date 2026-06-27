@@ -1,0 +1,5 @@
+-- Seed data for a fresh clone. Populated in Phase 2 with the realistic cohort
+-- content from the design (profiles, tickets PS-0001 through PS-0006, the
+-- categories and people) so a new checkout has a real-looking app.
+--
+-- Runs automatically on `npx supabase db reset` after the migrations apply.
