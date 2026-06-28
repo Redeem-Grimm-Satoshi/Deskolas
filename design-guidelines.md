@@ -126,15 +126,31 @@ Motion confirms a change, it does not perform.
 
 ---
 
-## 6 / Iconography
+## 6 / Logo
+
+The approved mark is the D monogram: a flat white letter D inside an accent
+(`#0EA5E9`) rounded square. Flat fill, no gradient, glow, or shadow. The square
+corner radius tracks the size (about 28 percent, so roughly 10px at a 36px mark).
+Ship it as the inline `BrandMark` component in `components/ui/logo.tsx`; the
+square is the `accent` token and the D is white knocked out with `fill-rule`
+evenodd. The source assets live in `brand/` (see `brand/README.md`).
+
+Wordmark: "Deskolas" in Inter 600, tracking `-0.02em`, sentence case. Ink is
+`text` per theme. Use the `Logo` lockup (mark plus wordmark) in chrome and auth.
+
+Do not substitute the lucide `Ticket` glyph (or any icon) for the logo. Do not
+recolor the square outside the accent ramp, add effects, or perforate the mark
+(the perforated stub belongs to ticket cards, never the logo).
+
+## 7 / Iconography
 
 lucide-react, uniform 1.5px stroke, 16 to 20px, optically centered. Icons carry meaning, not decoration. One icon per concept, used consistently. Never mix in a second icon set.
 
-App icon set in use: `Ticket` (brand mark, nav), `LifeBuoy`, `Inbox` / `Files` (my tickets), `BookOpen` (Knowledge Base, with an external-link affordance), `LayoutGrid` (dashboard), `Users` (people), `Search`, `Plus`, `ChevronDown`, `ChevronLeft`, `Bell`, `Lock`, `RotateCcw` (reopen), `LogOut`.
+App icon set in use: `Ticket` (the Tickets nav item only, never the logo), `LifeBuoy`, `Inbox` / `Files` (my tickets), `BookOpen` (Knowledge Base, with an external-link affordance), `LayoutGrid` (dashboard), `Users` (people), `Search`, `Plus`, `ChevronDown`, `ChevronLeft`, `Bell`, `Lock`, `RotateCcw` (reopen), `LogOut`.
 
 ---
 
-## 7 / The signature: perforated stub
+## 8 / The signature: perforated stub
 
 Deskolas's one distinctive device. A paper ticket has a tear-off stub along a perforated edge, so every ticket card splits into a mono-ID stub and a body, divided by a dashed perforation, with a slim status spine down the left edge. Glance down a queue and you read the whole state from spine colors alone.
 
@@ -164,7 +180,7 @@ Discipline:
 
 ---
 
-## 8 / Component catalog
+## 9 / Component catalog
 
 Build the library to match the Phase 2 style sheet (see `Deskolas Design System.dc.html`). Every component below has a dark and a light form and ships with all its states. Build on Radix primitives via shadcn/ui, restyled to these tokens, never shipped with default shadcn looks.
 
@@ -199,7 +215,7 @@ Build the library to match the Phase 2 style sheet (see `Deskolas Design System.
 
 ---
 
-## 9 / Voice and microcopy
+## 10 / Voice and microcopy
 
 - Sentence case everywhere. No terminal punctuation on buttons or labels.
 - Verb-first buttons: "Open a ticket", "Assign to me", "Resolve". Not "Submit" or "OK".
@@ -210,7 +226,7 @@ Build the library to match the Phase 2 style sheet (see `Deskolas Design System.
 
 ---
 
-## 10 / The "not vibe-coded" checklist
+## 11 / The "not vibe-coded" checklist
 
 | Tell to avoid                                          | What we do instead                                                           |
 | ------------------------------------------------------ | ---------------------------------------------------------------------------- |
@@ -227,7 +243,7 @@ Build the library to match the Phase 2 style sheet (see `Deskolas Design System.
 
 ---
 
-## 11 / Screen reference
+## 12 / Screen reference
 
 Faithful frames for every screen and state live in `readme/` (key screens) and the design components themselves. Organized by route group in `screens/` for engineering:
 
