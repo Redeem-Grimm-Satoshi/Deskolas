@@ -14,12 +14,14 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { StatusPill } from "@/components/ui/status-pill";
 import { Textarea } from "@/components/ui/textarea";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useToast } from "@/components/ui/toast";
 import {
   getActivity,
   getComments,
   getProfile,
   getTicket,
+  PROFILES,
   type Comment,
   type Ticket,
 } from "@/lib/mock-data";
@@ -50,6 +52,16 @@ const categoryOptions = TICKET_CATEGORIES.map((value) => ({
   value,
   label: value,
 }));
+
+// Admins can reassign to anyone in the cohort, or clear the assignment.
+const UNASSIGNED = "unassigned";
+const assigneeOptions = [
+  { value: UNASSIGNED, label: "Unassigned" },
+  ...Object.values(PROFILES).map((profile) => ({
+    value: profile.id,
+    label: profile.fullName,
+  })),
+];
 
 function Overline({ children }: { children: React.ReactNode }) {
   return (
@@ -113,6 +125,7 @@ function DetailHeader({
         / {ticketId}
       </span>
       <div className="ml-auto flex items-center gap-3">
+        <ThemeToggle />
         <NotificationsBell />
         <Avatar name={userName} size={32} />
       </div>
@@ -393,9 +406,20 @@ function TicketDetailView({ ticket }: { ticket: Ticket }) {
                 <>
                   <div>
                     <Overline>Assignee</Overline>
-                    <div className="rounded-control border-border bg-bg text-text mt-2 flex h-9 items-center border px-3 text-[14px]">
-                      <AssigneeValue id={assignedToId} />
-                    </div>
+                    <Select
+                      className="mt-2 w-full"
+                      options={assigneeOptions}
+                      value={assignedToId ?? UNASSIGNED}
+                      onValueChange={(value) => {
+                        const next = value === UNASSIGNED ? null : value;
+                        setAssignedToId(next);
+                        toast({
+                          message: next
+                            ? `Assigned to ${getProfile(next)?.fullName}`
+                            : `${ticket.id} unassigned`,
+                        });
+                      }}
+                    />
                   </div>
                   <div>
                     <Overline>Priority</Overline>
