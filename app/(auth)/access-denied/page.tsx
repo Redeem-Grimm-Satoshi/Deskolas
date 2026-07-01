@@ -12,12 +12,11 @@ export default function AccessDeniedPage() {
         <Lock className="text-prio-high size-[22px]" strokeWidth={1.5} />
       </span>
       <h1 className="text-title text-text mt-4 font-semibold tracking-[-0.01em]">
-        You need a cohort invite
+        You need a Per Scholas invite
       </h1>
       <p className="text-text-2 mt-1 text-[14px] leading-6">
-        Deskolas is limited to the{" "}
-        <span className="text-text font-mono">2026-RTT-23</span> cohort. Sign in
-        with your Per Scholas email, or ask an admin to send you an invite.
+        Deskolas is open to the Per Scholas community, by invite. Sign in with
+        the email you were invited with, or ask an admin to add you.
       </p>
       <div className="rounded-control border-border bg-bg mt-5 flex items-center justify-between border px-3 py-2.5">
         <span className="text-text-2 font-mono text-[13px]">

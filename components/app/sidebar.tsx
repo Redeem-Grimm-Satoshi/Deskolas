@@ -27,6 +27,13 @@ const openCount = TICKETS.filter(
   (ticket) => ticket.status === "new" || ticket.status === "in_progress",
 ).length;
 
+// The open board and My tickets are for everyone: anyone can browse and claim.
+// Admins additionally get the oversight views (Dashboard, People).
+const MEMBER_NAV: NavItem[] = [
+  { icon: Ticket, label: "Tickets", href: "/tickets", count: openCount },
+  { icon: Inbox, label: "My tickets", href: "/my-tickets" },
+];
+
 const ADMIN_NAV: NavItem[] = [
   { icon: Ticket, label: "Tickets", href: "/tickets", count: openCount },
   { icon: LayoutGrid, label: "Dashboard", href: "/dashboard" },
@@ -34,14 +41,10 @@ const ADMIN_NAV: NavItem[] = [
   { icon: Users, label: "People", href: "/people" },
 ];
 
-const LEARNER_NAV: NavItem[] = [
-  { icon: Inbox, label: "My tickets", href: "/my-tickets" },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
   const { role } = useSession();
-  const nav = role === "admin" ? ADMIN_NAV : LEARNER_NAV;
+  const nav = role === "admin" ? ADMIN_NAV : MEMBER_NAV;
 
   return (
     <div className="border-border bg-bg flex h-full w-60 flex-col border-r">

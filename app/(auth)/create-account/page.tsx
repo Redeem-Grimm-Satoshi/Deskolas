@@ -73,8 +73,8 @@ export default function CreateAccountPage() {
         </form>
 
         <p className="text-text-muted mt-4 text-[12px] leading-[18px]">
-          Accounts are for cohort members. Admin access is granted by an
-          existing admin, not chosen here.
+          Accounts are invite-only for the Per Scholas community. Admin access
+          is granted by an existing admin, not chosen here.
         </p>
       </div>
 
