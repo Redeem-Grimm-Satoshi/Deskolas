@@ -55,7 +55,7 @@ export default function PeoplePage() {
             </Button>
           </div>
           <p className="text-text-muted mt-2.5 text-[12px]">
-            Only cohort emails can be invited. Admin is granted here, never
+            Invite anyone in Per Scholas by email. Admin is granted here, never
             chosen at sign-up.
           </p>
         </section>

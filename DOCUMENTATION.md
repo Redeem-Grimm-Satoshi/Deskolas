@@ -11,8 +11,27 @@ AI-Enabled Healthcare IT cohort. Learners open tickets, classmates and admins
 work them through a lifecycle (new, in progress, resolved, closed), and the best
 fixes are flagged to feed the Learners Hub knowledge base.
 
-Two roles: learners (open and view their own tickets) and admins (see all
-tickets, assign, change status, resolve, close, promote to the knowledge base).
+## Access model (self-serve, autonomous)
+
+The system is built to run without a human triaging or assigning work. It is a
+pull board, not a push queue.
+
+- **Two roles: member and admin.** A member is anyone with an account. An admin
+  is a member plus oversight (manage people and invites, force actions, promote
+  to the knowledge base, see the metrics dashboard).
+- **Self-claim, no assigner.** Nobody hands out tickets. Anyone signed in
+  (students, alumni, instructors, any Per Scholas person) can claim any open
+  ticket and resolve it. Admins do not assign.
+- **Transparency.** Everyone signed in can read every ticket, which is what makes
+  claiming possible. Edit and resolve are limited to the ticket's opener, the
+  person who claimed it, and admins. That is the row-level security rule in
+  Phase 2.
+- **Invite-only accounts.** There is no single email domain to gate on (only
+  staff have `perscholas.org`; students use personal emails), so sign-up is an
+  allowlist: an admin or instructor adds people or imports the roster, and only
+  listed emails can register.
+
+The knowledge base handoff is documented in `docs/kb-integration.md`.
 
 ## Architecture
 
@@ -85,9 +104,10 @@ backend exists. This is deliberately throwaway and gets removed in Phase 2.
   can preview both the admin and learner experiences. Default is admin.
 - Nothing persists. Sign-in does not authenticate, status changes are local
   component state, and form submits show a toast rather than writing data.
-- The learner ticket detail still enforces the access rule in the UI (a learner
-  opening another learner's ticket sees the access-denied screen), which mirrors
-  the row-level security policy that will enforce it in the database.
+- The ticket detail reflects the self-claim access model: anyone can read a
+  ticket, an open ticket shows a Claim button, and once you claim it (or if you
+  are an admin) you get the status and resolution controls. This mirrors the
+  row-level security policy that will enforce it in the database.
 
 When Phase 2 lands, the screens keep their shape: server components and server
 actions read Supabase, the mock session becomes the real session, and
@@ -113,3 +133,8 @@ actions read Supabase, the mock session becomes the real session, and
   monogram and wired the favicons.
 - 2026-06-28, Phase 3 (preview): all application screens on the mock data layer,
   the authenticated shell, and the new-ticket and promote flows.
+- 2026-06-28, access model: switched to autonomous self-claim (anyone can claim
+  and resolve any open ticket, admins oversee), opened the ticket board to
+  everyone, added the Claim action, retired the in-app access-denied screen, and
+  moved to invite-only accounts. Added `docs/kb-integration.md` for the Learners
+  Hub handoff.

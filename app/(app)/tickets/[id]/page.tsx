@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Lock, RotateCcw } from "lucide-react";
+import { ChevronLeft, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
 import * as React from "react";
@@ -94,22 +94,20 @@ function AssigneeValue({ id }: { id: string | null }) {
 }
 
 function DetailHeader({
-  isAdmin,
   ticketId,
   userName,
 }: {
-  isAdmin: boolean;
   ticketId: string;
   userName: string;
 }) {
   return (
     <header className="border-border bg-bg sticky top-0 z-30 flex h-14 items-center gap-3 border-b px-6 max-sm:px-4">
       <Link
-        href={isAdmin ? "/tickets" : "/my-tickets"}
+        href="/tickets"
         className="text-text-2 hover:text-text flex items-center gap-1.5 text-[14px] transition-colors"
       >
         <ChevronLeft className="size-4" strokeWidth={1.5} />
-        {isAdmin ? "Tickets" : "My tickets"}
+        Tickets
       </Link>
       <span className="text-text-muted font-mono text-[13px]">
         / {ticketId}
@@ -135,6 +133,9 @@ function TicketDetailView({ ticket }: { ticket: Ticket }) {
   const isAdmin = role === "admin";
 
   const [status, setStatus] = React.useState<TicketStatus>(ticket.status);
+  const [assignedToId, setAssignedToId] = React.useState<string | null>(
+    ticket.assignedToId,
+  );
   const [notes, setNotes] = React.useState(ticket.resolutionNotes ?? "");
   const [comments, setComments] = React.useState<Comment[]>(() =>
     getComments(ticket.id),
@@ -147,45 +148,24 @@ function TicketDetailView({ ticket }: { ticket: Ticket }) {
       ?.timeLabel ?? ticket.createdLabel;
   const events = getActivity(ticket.id);
 
-  // Learners can only open their own tickets. This mirrors the row-level
-  // security policy that enforces it in the database, not just the UI.
-  if (!isAdmin && ticket.submittedById !== user.id) {
-    return (
-      <>
-        <DetailHeader
-          isAdmin={isAdmin}
-          ticketId={ticket.id}
-          userName={user.fullName}
-        />
-        <div className="flex flex-1 items-center justify-center p-6">
-          <div className="rounded-card border-border bg-surface flex max-w-md flex-col items-center border px-8 py-12 text-center">
-            <span className="bg-prio-high/10 flex size-11 items-center justify-center rounded-full">
-              <Lock className="text-prio-high size-[22px]" strokeWidth={1.5} />
-            </span>
-            <h1 className="text-title text-text mt-4 font-semibold tracking-[-0.01em]">
-              You don&apos;t have access to this
-            </h1>
-            <p className="text-text-2 mt-2 text-[14px] leading-6">
-              This ticket belongs to another learner. You can only open and view
-              your own tickets, enforced at the database, not just here.
-            </p>
-            <Button className="mt-6" asChild>
-              <Link href="/my-tickets">Back to my tickets</Link>
-            </Button>
-          </div>
-        </div>
-      </>
-    );
-  }
-
+  // Anyone signed in can read a ticket; the person working it (the claimer) or
+  // an admin can change its state. This mirrors the Phase 2 row-level security
+  // rule that replaces the old "see only your own tickets" restriction.
+  const canWork = isAdmin || assignedToId === user.id;
   const showResolution =
-    isAdmin || status === "resolved" || status === "closed";
+    canWork || status === "resolved" || status === "closed";
   const notesEditable =
-    isAdmin && (status === "new" || status === "in_progress");
+    canWork && (status === "new" || status === "in_progress");
 
   function advance(next: TicketStatus, message: string) {
     setStatus(next);
     toast({ message });
+  }
+
+  function claim() {
+    setAssignedToId(user.id);
+    if (status === "new") setStatus("in_progress");
+    toast({ message: `You claimed ${ticket.id}` });
   }
 
   function postComment() {
@@ -205,11 +185,7 @@ function TicketDetailView({ ticket }: { ticket: Ticket }) {
 
   return (
     <>
-      <DetailHeader
-        isAdmin={isAdmin}
-        ticketId={ticket.id}
-        userName={user.fullName}
-      />
+      <DetailHeader ticketId={ticket.id} userName={user.fullName} />
 
       <div className="grid gap-6 p-6 max-sm:p-4 lg:grid-cols-[1fr_300px]">
         <div className="flex min-w-0 flex-col gap-4">
@@ -347,7 +323,7 @@ function TicketDetailView({ ticket }: { ticket: Ticket }) {
         </div>
 
         <aside className="flex flex-col gap-4">
-          {isAdmin ? (
+          {canWork ? (
             <Panel>
               <div className="flex flex-col gap-3">
                 <div>
@@ -399,6 +375,16 @@ function TicketDetailView({ ticket }: { ticket: Ticket }) {
                 )}
               </div>
             </Panel>
+          ) : assignedToId === null ? (
+            <Panel>
+              <Button className="w-full" onClick={claim}>
+                Claim this ticket
+              </Button>
+              <p className="text-text-muted mt-2 text-[12px] leading-[18px]">
+                Pick it up and it becomes yours to work. Anyone in the cohort
+                can claim an open ticket.
+              </p>
+            </Panel>
           ) : null}
 
           <Panel>
@@ -408,7 +394,7 @@ function TicketDetailView({ ticket }: { ticket: Ticket }) {
                   <div>
                     <Overline>Assignee</Overline>
                     <div className="rounded-control border-border bg-bg text-text mt-2 flex h-9 items-center border px-3 text-[14px]">
-                      <AssigneeValue id={ticket.assignedToId} />
+                      <AssigneeValue id={assignedToId} />
                     </div>
                   </div>
                   <div>
@@ -430,11 +416,13 @@ function TicketDetailView({ ticket }: { ticket: Ticket }) {
                 </>
               ) : (
                 <>
-                  <RailField label="Status">
-                    <StatusPill status={status} />
-                  </RailField>
+                  {canWork ? null : (
+                    <RailField label="Status">
+                      <StatusPill status={status} />
+                    </RailField>
+                  )}
                   <RailField label="Assignee">
-                    <AssigneeValue id={ticket.assignedToId} />
+                    <AssigneeValue id={assignedToId} />
                   </RailField>
                   <RailField label="Priority">
                     {PRIORITY_LABELS[ticket.priority]}
@@ -465,12 +453,12 @@ function TicketDetailView({ ticket }: { ticket: Ticket }) {
                 Hub.
               </p>
             </Panel>
-          ) : (
+          ) : assignedToId && assignedToId !== user.id ? (
             <p className="text-text-muted px-1 text-[12px] leading-[18px]">
-              Status and assignment are managed by support. You can add comments
-              any time.
+              Claimed by {getProfile(assignedToId)?.fullName}. You can add
+              comments any time.
             </p>
-          )}
+          ) : null}
         </aside>
       </div>
     </>
