@@ -87,9 +87,47 @@ The handoff plan builds in checkpointed phases. Status:
 - Phase 3, screens: complete on mock data (built ahead of Phase 2 so the app is
   clickable early). Every designed screen is implemented and faithful to its
   frame in `screens/`.
-- Phase 2, Supabase: not started. It adds real auth, a Postgres schema with
-  row-level security, generated types, middleware role routing, and a seed
-  script, replacing the mock layer below.
+- Phase 2, Supabase: in progress. The database foundation is done (schema,
+  row-level security, the invite gate, the seed, and a passing RLS check against
+  the live database; see the Database section). Still to come: wiring real auth
+  and swapping the mock data for live queries.
+
+## Database
+
+Supabase is provisioned through the Supabase integration on Vercel, so there is
+one hosted database that development and production share. No local Docker stack.
+Pull the keys with `vercel env pull .env.local`.
+
+Schema (`supabase/migrations`):
+
+- `profiles`: one row per auth user, `role` is member or admin.
+- `tickets`: the ticket, with a generated `reference` (PS-0001 style) that is the
+  join key for the knowledge base handoff, plus the two KB-bridge fields.
+- `comments`: the per-ticket thread.
+- `invites`: the sign-up allowlist.
+
+Row-level security enforces the self-claim access model:
+
+- Anyone signed in can read every ticket, profile, and comment.
+- A ticket is editable only by its opener, the person who claimed it, or an
+  admin. Members claim an open ticket through the `claim_ticket` function
+  (security definer), which is the only way to take a ticket you do not own.
+- Sign-up is invite-only: a trigger on new auth users creates a profile only if
+  the email is in `invites`, and rejects anyone who is not. Email and OAuth both
+  flow through it.
+
+Workflow:
+
+- `npm run db:push` applies migrations to the database (uses the direct
+  connection string).
+- `npm run db:seed` loads the cohort people and a set of tickets. It prints the
+  demo sign-in credentials.
+- `npm run db:verify` runs the RLS checks against the live database (read-all
+  allowed, editing someone else's ticket blocked, claim works).
+
+Types live in `types/database.ts`. The CLI generator needs Docker, which we
+avoid, so the types are kept in sync with the migrations by hand for now; the
+file documents how to regenerate once a Supabase access token is configured.
 
 ## The mock preview layer (temporary)
 
@@ -141,3 +179,7 @@ actions read Supabase, the mock session becomes the real session, and
 - 2026-06-28, chrome: added the dark and light theme toggle to the top bar,
   ticket detail header, and auth screens, and made the ticket assignee editable
   so admins can reassign to any member or unassign.
+- 2026-07-01, Phase 2 database: provisioned Supabase through the Vercel
+  integration, added the schema migration, row-level security, the invite gate
+  and self-claim function, the seed, typed database definitions, and an RLS
+  verification that passes against the live database.
