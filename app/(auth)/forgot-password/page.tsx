@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BrandMark } from "@/components/ui/logo";
+import { requestPasswordReset } from "../actions";
 
 export default function ForgotPasswordPage() {
-  const router = useRouter();
+  const [state, formAction, pending] = useActionState(requestPasswordReset, {});
 
   return (
     <div className="rounded-card border-border bg-surface w-full max-w-[420px] border p-6">
@@ -19,15 +20,20 @@ export default function ForgotPasswordPage() {
       <p className="text-text-2 mt-1 text-[14px]">
         Enter your email and we will send a reset link.
       </p>
-      <form
-        className="mt-5 flex flex-col gap-4"
-        onSubmit={(event) => {
-          event.preventDefault();
-          router.push("/check-email");
-        }}
-      >
-        <Input label="Email" type="email" placeholder="you@cohort.dev" />
-        <Button type="submit" className="w-full">
+      <form className="mt-5 flex flex-col gap-4" action={formAction}>
+        <Input
+          label="Email"
+          name="email"
+          type="email"
+          placeholder="you@cohort.dev"
+          required
+        />
+        {state.error ? (
+          <p className="text-prio-high text-[13px] leading-[18px]">
+            {state.error}
+          </p>
+        ) : null}
+        <Button type="submit" className="w-full" loading={pending}>
           Send reset link
         </Button>
       </form>

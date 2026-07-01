@@ -64,15 +64,21 @@ components/
   ui/            token-themed primitives (button, input, select, ticket bits...)
   tickets/       feature components (ticket card, new-ticket dialog, promote)
   app/           shell pieces (sidebar, top bar, user menu, notifications)
-  providers/     theme and mock session providers
+  providers/     theme and session providers
 lib/
-  mock-data.ts   preview data layer (replaced by Supabase in Phase 2)
-  tickets.ts     status, priority, category vocabulary
+  queries.ts     server-side data access (RLS runs on every query)
+  tickets.ts     roles, status, priority, category vocabulary
   ticket-view.ts sort and card-prop helpers, spine color map
-  validations/   zod schemas shared by client and (later) server
+  format.ts      relative-time and date labels
+  validations/   zod schemas shared by client and server
+  supabase/      server, client, and middleware Supabase helpers
   styles.ts      shared focus-ring class
   utils.ts       cn() class merge
-supabase/        migrations and seed (filled in Phase 2)
+app/(app)/actions.ts   ticket and people server actions
+app/(auth)/actions.ts  sign in, sign up, sign out, password reset
+middleware.ts    session refresh and auth gating
+supabase/        migrations, config, and the seed script
+scripts/         seed and RLS verification (Node, against the cloud DB)
 brand/           logo and icon source assets
 ```
 
@@ -84,13 +90,11 @@ The handoff plan builds in checkpointed phases. Status:
   fingerprint guard, and the design-token foundation.
 - Phase 1, design system in code: complete. The `components/ui` library built to
   `COMPONENT_INVENTORY.md`, in dark and light, viewable at `/components`.
-- Phase 3, screens: complete on mock data (built ahead of Phase 2 so the app is
-  clickable early). Every designed screen is implemented and faithful to its
-  frame in `screens/`.
-- Phase 2, Supabase: in progress. The database foundation is done (schema,
-  row-level security, the invite gate, the seed, and a passing RLS check against
-  the live database; see the Database section). Still to come: wiring real auth
-  and swapping the mock data for live queries.
+- Phase 2, Supabase: complete. Real invite-gated auth, session and role routing
+  in middleware, every screen wired to live queries, and the ticket and people
+  mutations as server actions. The mock layer is removed.
+- Phase 3, screens: complete. Every designed screen is implemented, faithful to
+  its frame in `screens/`, and now backed by live data.
 
 ## Database
 
@@ -129,33 +133,30 @@ Types live in `types/database.ts`. The CLI generator needs Docker, which we
 avoid, so the types are kept in sync with the migrations by hand for now; the
 file documents how to regenerate once a Supabase access token is configured.
 
-## The mock preview layer (temporary)
+## Auth and data flow
 
-The screens currently run on a stand-in layer so they can be reviewed before the
-backend exists. This is deliberately throwaway and gets removed in Phase 2.
+- Middleware (`middleware.ts`) refreshes the Supabase session on every request
+  and gates routes: no user reaches an `(app)` route, and a signed-in user is
+  bounced off the guest-only auth pages. The root `/` routes by role (admin to
+  the dashboard, member to their tickets).
+- `(app)` pages are server components. They call `lib/queries` (which runs under
+  RLS), then hand plain data to small client components for the interactive bits
+  (filters, the claim button, the detail controls).
+- Mutations are server actions in `app/(app)/actions.ts` (create, claim, status,
+  resolve, comment, reassign, promote, invite, role). They run the Supabase
+  write under RLS and revalidate the affected routes; the client refreshes for
+  the current view.
+- The signed-in profile is fetched once per request (`getSessionProfile`,
+  React-cached) and passed into a small client `SessionProvider` for the chrome.
 
-- `lib/mock-data.ts` holds profiles, tickets (PS-0001 through PS-0011), comments,
-  activity, notifications, and the dashboard summary. Times are stored as the
-  exact labels the frames show, not timestamps.
-- `components/providers/session-provider.tsx` is a mock session. It sets the
-  current user and exposes a "View as" switch (in the sidebar user menu) so you
-  can preview both the admin and learner experiences. Default is admin.
-- Nothing persists. Sign-in does not authenticate, status changes are local
-  component state, and form submits show a toast rather than writing data.
-- The ticket detail reflects the self-claim access model: anyone can read a
-  ticket, an open ticket shows a Claim button, and once you claim it (or if you
-  are an admin) you get the status and resolution controls. This mirrors the
-  row-level security policy that will enforce it in the database.
-
-When Phase 2 lands, the screens keep their shape: server components and server
-actions read Supabase, the mock session becomes the real session, and
-`types/database.ts` is generated from the schema.
+Demo logins after `npm run db:seed`: any cohort email with the password
+`deskolas123`. Admins are `andre@cohort.dev` and `maria@cohort.dev`; members are
+`priya@`, `redeem@`, and `jose@`.
 
 ## Conventions
 
 - Server components by default; `"use client"` only where interaction needs it.
-  The preview screens are client components because they drive local state and
-  the role switch; they convert back as data moves server-side in Phase 2.
+  List and detail pages fetch on the server and pass data to client components.
 - Forms validate with zod (`lib/validations`), and the schema is shared so the
   same rules run on the client and the server.
 - No raw hex or one-off sizes; tokens only. No em dashes and no AI attribution
@@ -183,3 +184,8 @@ actions read Supabase, the mock session becomes the real session, and
   integration, added the schema migration, row-level security, the invite gate
   and self-claim function, the seed, typed database definitions, and an RLS
   verification that passes against the live database.
+- 2026-07-01, Phase 2 auth and live data: real invite-gated sign in and sign up,
+  session and role routing in middleware, every screen wired to live Supabase
+  queries, and the ticket and people mutations as server actions. Removed the
+  mock layer. Verified the login, role routing, and self-claim flows against the
+  live database.

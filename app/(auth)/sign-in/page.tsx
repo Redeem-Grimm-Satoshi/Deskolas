@@ -1,21 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
 
-import { BrandMark } from "@/components/ui/logo";
-import { Button } from "@/components/ui/button";
 import { GithubIcon, GoogleIcon } from "@/components/ui/brand-icons";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BrandMark } from "@/components/ui/logo";
+import { signIn, signInWithProvider } from "../actions";
 
 export default function SignInPage() {
-  const router = useRouter();
-
-  // Mock sign-in: route to the admin landing. Phase 2 reads the real role and
-  // routes admins to the dashboard, learners to my tickets.
-  function signIn() {
-    router.push("/dashboard");
-  }
+  const [state, formAction, pending] = useActionState(signIn, {});
 
   return (
     <div className="w-full max-w-[420px]">
@@ -31,11 +26,19 @@ export default function SignInPage() {
 
       <div className="rounded-card border-border bg-surface border p-6">
         <div className="flex flex-col gap-2.5">
-          <Button variant="secondary" className="w-full" onClick={signIn}>
+          <Button
+            variant="secondary"
+            className="w-full"
+            onClick={() => signInWithProvider("google")}
+          >
             <GoogleIcon className="size-4" />
             Continue with Google
           </Button>
-          <Button variant="secondary" className="w-full" onClick={signIn}>
+          <Button
+            variant="secondary"
+            className="w-full"
+            onClick={() => signInWithProvider("github")}
+          >
             <GithubIcon className="size-4" />
             Continue with GitHub
           </Button>
@@ -47,14 +50,14 @@ export default function SignInPage() {
           <span className="bg-border h-px flex-1" />
         </div>
 
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            signIn();
-          }}
-        >
-          <Input label="Email" type="email" placeholder="you@cohort.dev" />
+        <form className="flex flex-col gap-4" action={formAction}>
+          <Input
+            label="Email"
+            name="email"
+            type="email"
+            placeholder="you@cohort.dev"
+            required
+          />
           <div>
             <div className="mb-1.5 flex items-center justify-between">
               <label
@@ -70,9 +73,14 @@ export default function SignInPage() {
                 Forgot password?
               </Link>
             </div>
-            <Input id="password" type="password" placeholder="••••••••" />
+            <Input id="password" name="password" type="password" required />
           </div>
-          <Button type="submit" className="w-full">
+          {state.error ? (
+            <p className="text-prio-high text-[13px] leading-[18px]">
+              {state.error}
+            </p>
+          ) : null}
+          <Button type="submit" className="w-full" loading={pending}>
             Sign in
           </Button>
         </form>

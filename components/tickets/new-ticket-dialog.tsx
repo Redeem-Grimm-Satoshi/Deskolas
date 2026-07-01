@@ -1,8 +1,10 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 
+import { createTicket } from "@/app/(app)/actions";
 import { useSession } from "@/components/providers/session-provider";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -52,12 +54,14 @@ function NewTicketDialog({
 }) {
   const { user } = useSession();
   const toast = useToast();
+  const router = useRouter();
 
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [category, setCategory] = React.useState("");
   const [priority, setPriority] = React.useState<TicketPriority>("low");
   const [errors, setErrors] = React.useState<Errors>({});
+  const [submitting, setSubmitting] = React.useState(false);
 
   function reset() {
     setTitle("");
@@ -67,7 +71,7 @@ function NewTicketDialog({
     setErrors({});
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const result = newTicketSchema.safeParse({
       title,
       description,
@@ -89,9 +93,22 @@ function NewTicketDialog({
       return;
     }
 
-    toast({ tone: "success", message: "Ticket PS-0012 submitted" });
+    setSubmitting(true);
+    const outcome = await createTicket(result.data);
+    setSubmitting(false);
+
+    if (outcome.error) {
+      toast({ message: outcome.error });
+      return;
+    }
+
+    toast({
+      tone: "success",
+      message: `Ticket ${outcome.reference} submitted`,
+    });
     reset();
     onOpenChange(false);
+    router.refresh();
   }
 
   return (
@@ -114,7 +131,9 @@ function NewTicketDialog({
           <Button variant="secondary" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>Open ticket</Button>
+          <Button onClick={handleSubmit} loading={submitting}>
+            Open ticket
+          </Button>
         </>
       }
     >

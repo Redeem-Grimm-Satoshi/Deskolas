@@ -2,7 +2,10 @@
 
 import { Lock, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
+import * as React from "react";
 
+import { signOut } from "@/app/(auth)/actions";
+import { updateProfileName } from "@/app/(app)/actions";
 import { AppTopBar } from "@/components/app/app-top-bar";
 import { useSession } from "@/components/providers/session-provider";
 import { Avatar } from "@/components/ui/avatar";
@@ -10,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Toggle } from "@/components/ui/toggle";
 import { useToast } from "@/components/ui/toast";
+import { ROLE_LABELS } from "@/lib/tickets";
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
@@ -23,6 +27,16 @@ export default function SettingsPage() {
   const { user, role } = useSession();
   const router = useRouter();
   const toast = useToast();
+  const [name, setName] = React.useState(user.fullName);
+  const [saving, setSaving] = React.useState(false);
+
+  async function save() {
+    setSaving(true);
+    const result = await updateProfileName(name);
+    setSaving(false);
+    toast({ message: result.error ?? "Profile saved" });
+    router.refresh();
+  }
 
   return (
     <>
@@ -44,7 +58,11 @@ export default function SettingsPage() {
           </div>
 
           <div className="mt-5 flex flex-col gap-4">
-            <Input label="Full name" defaultValue={user.fullName} />
+            <Input
+              label="Full name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+            />
             <div>
               <Input
                 label="Email"
@@ -62,11 +80,11 @@ export default function SettingsPage() {
           <div className="border-border mt-5 flex items-center justify-between border-t pt-4">
             <span className="text-text-2 flex items-center gap-2 text-[13px]">
               Role
-              <span className="bg-hover-surface text-text inline-flex items-center rounded-full px-2.5 py-[3px] text-[12px] font-medium capitalize">
-                {role}
+              <span className="bg-hover-surface text-text inline-flex items-center rounded-full px-2.5 py-[3px] text-[12px] font-medium">
+                {ROLE_LABELS[role]}
               </span>
             </span>
-            <Button onClick={() => toast({ message: "Profile saved" })}>
+            <Button onClick={save} loading={saving}>
               Save changes
             </Button>
           </div>
@@ -110,7 +128,7 @@ export default function SettingsPage() {
 
         <button
           type="button"
-          onClick={() => router.push("/sign-in")}
+          onClick={() => signOut()}
           className="text-prio-high flex items-center gap-1.5 self-end text-[14px] font-medium"
         >
           <LogOut className="size-4" strokeWidth={1.5} />

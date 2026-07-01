@@ -1,8 +1,12 @@
 import { expect, test } from "@playwright/test";
 
-// The critical sign-in to close flow replaces this smoke check in Phase 3.
-test("home page renders the brand", async ({ page }) => {
+// An unauthenticated visitor to the root is routed to sign in, which shows the
+// brand and the sign-in form. Runs with placeholder Supabase keys in CI.
+test("root redirects an unauthenticated visitor to sign in", async ({
+  page,
+}) => {
   await page.goto("/");
-  await expect(page.getByText("Deskolas")).toBeVisible();
+  await expect(page).toHaveURL(/\/sign-in$/);
   await expect(page.getByText("The cohort help desk.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
 });

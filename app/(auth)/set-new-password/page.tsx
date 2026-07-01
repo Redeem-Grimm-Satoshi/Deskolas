@@ -1,13 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BrandMark } from "@/components/ui/logo";
+import { updatePassword } from "../actions";
 
 export default function SetNewPasswordPage() {
-  const router = useRouter();
+  const [state, formAction, pending] = useActionState(updatePassword, {});
 
   return (
     <div className="rounded-card border-border bg-surface w-full max-w-[420px] border p-6">
@@ -18,24 +19,27 @@ export default function SetNewPasswordPage() {
       <p className="text-text-2 mt-1 text-[14px]">
         Choose a password you have not used before.
       </p>
-      <form
-        className="mt-5 flex flex-col gap-4"
-        onSubmit={(event) => {
-          event.preventDefault();
-          router.push("/sign-in");
-        }}
-      >
+      <form className="mt-5 flex flex-col gap-4" action={formAction}>
         <Input
           label="New password"
+          name="password"
           type="password"
           placeholder="At least 8 characters"
+          required
         />
         <Input
           label="Confirm password"
+          name="confirm"
           type="password"
           placeholder="Re-enter password"
+          required
         />
-        <Button type="submit" className="w-full">
+        {state.error ? (
+          <p className="text-prio-high text-[13px] leading-[18px]">
+            {state.error}
+          </p>
+        ) : null}
+        <Button type="submit" className="w-full" loading={pending}>
           Update password
         </Button>
       </form>

@@ -1,9 +1,10 @@
 "use client";
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { LogOut, Repeat, Settings, type LucideIcon } from "lucide-react";
+import { LogOut, Settings, type LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+import { signOut } from "@/app/(auth)/actions";
 import { useSession } from "@/components/providers/session-provider";
 import { Avatar } from "@/components/ui/avatar";
 import { focusRing } from "@/lib/styles";
@@ -30,9 +31,8 @@ function Item({
 }
 
 export function UserMenu() {
-  const { user, role, viewAs } = useSession();
+  const { user, role } = useSession();
   const router = useRouter();
-  const otherRole = role === "admin" ? "learner" : "admin";
 
   return (
     <DropdownMenu.Root>
@@ -62,17 +62,8 @@ export function UserMenu() {
           <Item icon={Settings} onSelect={() => router.push("/settings")}>
             Settings
           </Item>
-          <Item
-            icon={Repeat}
-            onSelect={() => {
-              viewAs(otherRole);
-              router.push(otherRole === "admin" ? "/dashboard" : "/my-tickets");
-            }}
-          >
-            View as {otherRole}
-          </Item>
           <DropdownMenu.Separator className="bg-border my-1 h-px" />
-          <Item icon={LogOut} onSelect={() => router.push("/sign-in")}>
+          <Item icon={LogOut} onSelect={() => signOut()}>
             Sign out
           </Item>
         </DropdownMenu.Content>
