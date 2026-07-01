@@ -1,12 +1,15 @@
 import { createServerClient } from "@supabase/ssr";
+import type { User } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 
 import type { Database } from "@/types/database";
 
-// Refreshes the Supabase auth session on every request and returns a response
-// carrying the updated cookies. Phase 2 wires this into the root middleware and
-// adds role-based routing (admin to dashboard, learner to my tickets) on top.
-export async function updateSession(request: NextRequest) {
+// Refreshes the Supabase auth session on every request and returns the updated
+// response (carrying refreshed cookies) along with the current user, which the
+// root middleware uses to gate routes.
+export async function updateSession(
+  request: NextRequest,
+): Promise<{ response: NextResponse; user: User | null }> {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient<Database>(
@@ -30,8 +33,9 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // Touching getUser refreshes the session cookie when it is close to expiry.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  return response;
+  return { response, user };
 }

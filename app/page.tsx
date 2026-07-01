@@ -1,7 +1,11 @@
 import { redirect } from "next/navigation";
 
-// The entry point. Phase 2 reads the session here and routes by role; until
-// then it sends everyone to sign in.
-export default function Home() {
-  redirect("/sign-in");
+import { getSessionProfile } from "@/lib/queries";
+
+// The entry point routes by role: admins land on the dashboard, members on
+// their own tickets. Unauthenticated users are sent to sign in.
+export default async function Home() {
+  const profile = await getSessionProfile();
+  if (!profile) redirect("/sign-in");
+  redirect(profile.role === "admin" ? "/dashboard" : "/my-tickets");
 }

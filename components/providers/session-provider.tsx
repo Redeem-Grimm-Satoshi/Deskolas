@@ -2,31 +2,28 @@
 
 import * as React from "react";
 
-import { PROFILES, type Profile, type Role } from "@/lib/mock-data";
+import type { Role, SessionProfile } from "@/lib/tickets";
 
-// Mock session for the UI preview. Phase 2 replaces this with the real Supabase
-// user and role read on the server. The "view as" switch lets you preview both
-// the admin and learner experiences without real auth.
-type SessionValue = {
-  user: Profile;
-  role: Role;
-  viewAs: (role: Role) => void;
-};
+// Holds the signed-in user's profile for client components (the sidebar, the
+// top bar, menus). The value is fetched on the server and passed down, so this
+// is just context, no fetching.
+type SessionValue = { user: SessionProfile; role: Role };
 
 const SessionContext = React.createContext<SessionValue | null>(null);
 
-export function SessionProvider({ children }: { children: React.ReactNode }) {
-  const [userId, setUserId] = React.useState("andre");
-  const user = PROFILES[userId];
-
-  const viewAs = React.useCallback((role: Role) => {
-    setUserId(role === "admin" ? "andre" : "redeem");
-  }, []);
-
+export function SessionProvider({
+  profile,
+  children,
+}: {
+  profile: SessionProfile;
+  children: React.ReactNode;
+}) {
+  const value = React.useMemo(
+    () => ({ user: profile, role: profile.role }),
+    [profile],
+  );
   return (
-    <SessionContext.Provider value={{ user, role: user.role, viewAs }}>
-      {children}
-    </SessionContext.Provider>
+    <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
   );
 }
 

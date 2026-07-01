@@ -1,19 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
 
 import { GithubIcon, GoogleIcon } from "@/components/ui/brand-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BrandMark } from "@/components/ui/logo";
+import { signInWithProvider, signUp } from "../actions";
 
 export default function CreateAccountPage() {
-  const router = useRouter();
-
-  function createAccount() {
-    router.push("/my-tickets");
-  }
+  const [state, formAction, pending] = useActionState(signUp, {});
 
   return (
     <div className="w-full max-w-[420px]">
@@ -32,7 +29,7 @@ export default function CreateAccountPage() {
           <Button
             variant="secondary"
             className="w-full"
-            onClick={createAccount}
+            onClick={() => signInWithProvider("google")}
           >
             <GoogleIcon className="size-4" />
             Continue with Google
@@ -40,7 +37,7 @@ export default function CreateAccountPage() {
           <Button
             variant="secondary"
             className="w-full"
-            onClick={createAccount}
+            onClick={() => signInWithProvider("github")}
           >
             <GithubIcon className="size-4" />
             Continue with GitHub
@@ -53,21 +50,33 @@ export default function CreateAccountPage() {
           <span className="bg-border h-px flex-1" />
         </div>
 
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            createAccount();
-          }}
-        >
-          <Input label="Full name" placeholder="Redeem G." />
-          <Input label="Email" type="email" placeholder="you@cohort.dev" />
+        <form className="flex flex-col gap-4" action={formAction}>
+          <Input
+            label="Full name"
+            name="full_name"
+            placeholder="Redeem G."
+            required
+          />
+          <Input
+            label="Email"
+            name="email"
+            type="email"
+            placeholder="you@cohort.dev"
+            required
+          />
           <Input
             label="Password"
+            name="password"
             type="password"
             placeholder="At least 8 characters"
+            required
           />
-          <Button type="submit" className="w-full">
+          {state.error ? (
+            <p className="text-prio-high text-[13px] leading-[18px]">
+              {state.error}
+            </p>
+          ) : null}
+          <Button type="submit" className="w-full" loading={pending}>
             Create account
           </Button>
         </form>

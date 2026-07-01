@@ -1,14 +1,11 @@
-"use client";
-
 import Link from "next/link";
 
 import { AppTopBar } from "@/components/app/app-top-bar";
+import { ClaimButton } from "@/components/tickets/claim-button";
 import { NewTicketButton } from "@/components/tickets/new-ticket-dialog";
 import { Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { PriorityLabel } from "@/components/ui/priority-label";
-import { useToast } from "@/components/ui/toast";
-import { DASHBOARD, getProfile, getTicket } from "@/lib/mock-data";
+import { getDashboard } from "@/lib/queries";
 import { SPINE_CLASS } from "@/lib/ticket-view";
 import { cn } from "@/lib/utils";
 
@@ -66,9 +63,9 @@ function MetricTile({
   );
 }
 
-export default function DashboardPage() {
-  const toast = useToast();
-  const maxCategory = Math.max(...DASHBOARD.byCategory.map((c) => c.count));
+export default async function DashboardPage() {
+  const data = await getDashboard();
+  const maxCategory = Math.max(1, ...data.byCategory.map((c) => c.count));
 
   return (
     <>
@@ -86,22 +83,18 @@ export default function DashboardPage() {
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <MetricTile
             label="Open"
-            value={DASHBOARD.open}
+            value={data.open}
             sub="across all categories"
           />
           <MetricTile
             label="In progress"
-            value={DASHBOARD.inProgress}
+            value={data.inProgress}
             sub="being worked now"
           />
-          <MetricTile
-            label="Resolved"
-            value={DASHBOARD.resolvedThisWeek}
-            sub="this week"
-          />
+          <MetricTile label="Resolved" value={data.resolved} sub="so far" />
           <MetricTile
             label="Unassigned"
-            value={DASHBOARD.unassigned}
+            value={data.unassigned}
             sub="need attention"
             attention
           />
@@ -120,13 +113,11 @@ export default function DashboardPage() {
                 </Link>
               }
             >
-              <div className="flex flex-col gap-1">
-                {DASHBOARD.needsAttention.map((id) => {
-                  const ticket = getTicket(id);
-                  if (!ticket) return null;
-                  return (
+              {data.needsAttention.length > 0 ? (
+                <div className="flex flex-col gap-1">
+                  {data.needsAttention.map((ticket) => (
                     <div
-                      key={id}
+                      key={ticket.id}
                       className="rounded-control flex items-center gap-3 px-1 py-2"
                     >
                       <span
@@ -137,71 +128,68 @@ export default function DashboardPage() {
                         aria-hidden
                       />
                       <Link
-                        href={`/tickets/${ticket.id}`}
+                        href={`/tickets/${ticket.reference}`}
                         className="text-text-muted font-mono text-[12px] tabular-nums"
                       >
-                        {ticket.id}
+                        {ticket.reference}
                       </Link>
                       <Link
-                        href={`/tickets/${ticket.id}`}
+                        href={`/tickets/${ticket.reference}`}
                         className="text-text min-w-0 flex-1 truncate text-[14px] font-medium"
                       >
                         {ticket.title}
                       </Link>
                       <PriorityLabel priority={ticket.priority} />
-                      <Button
-                        variant="secondary"
-                        onClick={() =>
-                          toast({ message: `${ticket.id} assigned to you` })
-                        }
-                      >
-                        Assign to me
-                      </Button>
+                      <ClaimButton
+                        ticketId={ticket.id}
+                        reference={ticket.reference}
+                      />
                     </div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-text-2 text-[14px]">
+                  Nothing unassigned right now. Nice.
+                </p>
+              )}
             </Card>
 
             <Card title="Recent activity">
-              <div className="flex flex-col gap-3.5">
-                {DASHBOARD.recentActivity.map((event, index) => {
-                  const actor = getProfile(event.actorId);
-                  if (!actor) return null;
-                  return (
+              {data.recentActivity.length > 0 ? (
+                <div className="flex flex-col gap-3.5">
+                  {data.recentActivity.map((event, index) => (
                     <div
                       key={index}
                       className="flex items-center gap-2.5 text-[13px]"
                     >
-                      <Avatar name={actor.fullName} size={20} />
+                      <Avatar name={event.actorName} size={20} />
                       <p className="text-text-2">
                         <span className="text-text font-medium">
-                          {actor.fullName}
+                          {event.actorName}
                         </span>{" "}
                         {event.action}{" "}
                         <Link
-                          href={`/tickets/${event.ticketId}`}
+                          href={`/tickets/${event.reference}`}
                           className="text-accent-text font-mono"
                         >
-                          {event.ticketId}
-                        </Link>
-                        {event.flaggedForKb
-                          ? " and flagged it for the Knowledge Base"
-                          : ""}{" "}
+                          {event.reference}
+                        </Link>{" "}
                         <span className="text-text-muted">
                           · {event.timeLabel}
                         </span>
                       </p>
                     </div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-text-2 text-[14px]">No activity yet.</p>
+              )}
             </Card>
           </div>
 
           <Card title="Tickets by category">
             <div className="flex flex-col gap-3">
-              {DASHBOARD.byCategory.map((row) => (
+              {data.byCategory.map((row) => (
                 <div
                   key={row.category}
                   className="flex items-center gap-3 text-[13px]"
@@ -224,7 +212,7 @@ export default function DashboardPage() {
             <div className="border-border mt-4 flex items-center justify-between border-t pt-4 text-[13px]">
               <span className="text-text-2">Median time to resolve</span>
               <span className="text-text font-mono tabular-nums">
-                {DASHBOARD.medianResolve}
+                {data.medianResolve}
               </span>
             </div>
           </Card>

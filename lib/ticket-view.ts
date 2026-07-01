@@ -1,4 +1,5 @@
-import { getProfile, type Ticket } from "@/lib/mock-data";
+import { relativeTime } from "@/lib/format";
+import type { TicketView } from "@/lib/queries";
 import type { TicketPriority, TicketStatus } from "@/lib/tickets";
 
 // Spine color per status, shared by the ticket card and any compact ticket row.
@@ -24,7 +25,7 @@ const PRIORITY_WEIGHT: Record<TicketPriority, number> = {
   low: 2,
 };
 
-export function sortTickets(tickets: Ticket[]): Ticket[] {
+export function sortTickets(tickets: TicketView[]): TicketView[] {
   return [...tickets].sort(
     (a, b) =>
       STATUS_ORDER[a.status] - STATUS_ORDER[b.status] ||
@@ -32,16 +33,17 @@ export function sortTickets(tickets: Ticket[]): Ticket[] {
   );
 }
 
-export function ticketCardProps(ticket: Ticket) {
-  const assignee = getProfile(ticket.assignedToId);
+// Props for the perforated-stub ticket card. The stub shows the reference, and
+// the card links to the ticket by that reference.
+export function ticketCardProps(ticket: TicketView) {
   return {
-    id: ticket.id,
+    id: ticket.reference,
     title: ticket.title,
     status: ticket.status,
     priority: ticket.priority,
     category: ticket.category,
-    assignee: assignee ? { name: assignee.fullName } : null,
-    updatedLabel: ticket.updatedLabel,
-    href: `/tickets/${ticket.id}`,
+    assignee: ticket.assigneeName ? { name: ticket.assigneeName } : null,
+    updatedLabel: relativeTime(ticket.updatedAt),
+    href: `/tickets/${ticket.reference}`,
   };
 }

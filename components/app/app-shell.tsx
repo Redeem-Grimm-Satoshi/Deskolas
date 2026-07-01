@@ -1,11 +1,18 @@
 "use client";
 
 import { SessionProvider } from "@/components/providers/session-provider";
+import type { SessionProfile } from "@/lib/tickets";
 import { Sidebar } from "./sidebar";
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  profile,
+  children,
+}: {
+  profile: SessionProfile;
+  children: React.ReactNode;
+}) {
   return (
-    <SessionProvider>
+    <SessionProvider profile={profile}>
       <div className="bg-bg flex min-h-dvh">
         <aside className="sticky top-0 hidden h-dvh shrink-0 lg:flex">
           <Sidebar />

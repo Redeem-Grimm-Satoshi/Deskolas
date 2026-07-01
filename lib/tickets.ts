@@ -2,6 +2,21 @@
 // pill, and the priority label, so they live in one place and every component
 // derives from them rather than restating the strings.
 
+// Two roles: a member is anyone with an account; an admin also oversees.
+export const ROLES = ["member", "admin"] as const;
+export type Role = (typeof ROLES)[number];
+export const ROLE_LABELS: Record<Role, string> = {
+  member: "Member",
+  admin: "Admin",
+};
+
+export type SessionProfile = {
+  id: string;
+  fullName: string;
+  email: string;
+  role: Role;
+};
+
 export const TICKET_STATUSES = [
   "new",
   "in_progress",
