@@ -6,8 +6,9 @@ hit, classmates pick them up and resolve them, and the best fixes feed the
 Learners Hub knowledge base.
 
 <img width="1440" height="900" alt="Ticket queue" src="https://github.com/user-attachments/assets/dff05e23-efcb-4372-a996-594e2e348016" />
-<img width="1440" height="900" alt="Ticket detail" src="https://github.com/user-attachments/assets/e53c9e19-03b1-41f2-be5c-931e17803fa2" />
-<img width="1440" height="900" alt="Dashboard" src="https://github.com/user-attachments/assets/76792ba5-0d3a-462b-bd83-6830d9b19278" />
+
+## Design System
+[Deskolas Design System.pdf](https://github.com/user-attachments/files/29555947/Deskolas.Design.System.pdf)
 
 ## Stack
 
