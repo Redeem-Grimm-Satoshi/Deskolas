@@ -138,3 +138,6 @@ actions read Supabase, the mock session becomes the real session, and
   everyone, added the Claim action, retired the in-app access-denied screen, and
   moved to invite-only accounts. Added `docs/kb-integration.md` for the Learners
   Hub handoff.
+- 2026-06-28, chrome: added the dark and light theme toggle to the top bar,
+  ticket detail header, and auth screens, and made the ticket assignee editable
+  so admins can reassign to any member or unassign.
