@@ -7,6 +7,7 @@ import * as React from "react";
 import { useSession } from "@/components/providers/session-provider";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/utils";
 import { NotificationsBell } from "./notifications-bell";
 import { Sidebar } from "./sidebar";
@@ -68,6 +69,7 @@ export function AppTopBar({
       {search ? <div className="hidden min-w-0 sm:block">{search}</div> : null}
       <div className="ml-auto flex shrink-0 items-center gap-3">
         {actions}
+        <ThemeToggle />
         <NotificationsBell />
         <Avatar name={user.fullName} size={32} />
       </div>
