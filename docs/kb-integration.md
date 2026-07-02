@@ -1,95 +1,107 @@
 # Deskolas to Learners Hub integration
 
-A proposal for connecting Deskolas (ticketing) to the Learners Hub knowledge
-base, to bring to the sync with the KB team. This is the KCS loop: resolved
-tickets become candidate articles.
+Connecting Deskolas (ticketing) to the Learners Hub knowledge base: the KCS
+loop, where resolved tickets become candidate articles.
 
-Status: proposal. The wiring lands in Phase 2, once Deskolas has its Supabase
-backend and server-side API routes. Target for MVP integration: July 6, 2026.
+Status: implemented, behind env-var config, ready for the live test with the KB
+team. Target for MVP integration: July 6, 2026. The contract below reflects what
+the KB team confirmed on issue #6.
 
 ## The loop
 
 1. A ticket is resolved in Deskolas and an admin clicks **Promote to Knowledge
-   Base**. That sets `is_candidate_article = true` on the ticket.
-2. Deskolas POSTs the ticket data to the Learners Hub submissions API. It lands
-   in their Admin Portal QA queue.
+   Base**. That sets `is_candidate_article = true` and hands the ticket off to
+   Learners Hub.
+2. Deskolas POSTs the ticket to the Learners Hub submissions API. It lands in
+   their Admin Portal QA queue. We store the id they return.
 3. The KB team formats and publishes the article.
-4. On publish, Learners Hub calls a Deskolas webhook with the published URL.
-   Deskolas stores it in `tickets.kb_article_url` and shows an "In Knowledge
-   Base" tag on the ticket.
+4. On publish, Learners Hub calls our webhook with the published URL. Deskolas
+   stores it in `tickets.kb_article_url` and the ticket shows an "In Knowledge
+   Base" link.
 
 ## Why promote, not every resolve
 
-Firing on every resolved ticket would flood the QA queue with routine fixes.
+Firing on every resolved ticket would flood their QA queue with routine fixes.
 Firing on the explicit **Promote** action means only curated, genuinely reusable
-fixes are handed off. The two KB-bridge fields (`is_candidate_article`,
-`kb_article_url`) have been on the `tickets` table since the first migration for
-exactly this, so no schema change is needed.
+fixes are handed off.
 
 ## Contract
 
 ### Deskolas to Learners Hub (on promote)
 
-`POST {learners_hub_base}/api/submissions`
+We POST directly to the Learners Hub Supabase REST API.
 
-Headers: `Authorization: Bearer <shared secret>`, `Content-Type: application/json`
+`POST {KB_SUBMISSIONS_URL}` (their `.../rest/v1/submissions`)
+
+Headers: `apikey: {KB_API_KEY}`, `Authorization: Bearer {KB_API_KEY}`,
+`Content-Type: application/json`, `Prefer: return=representation`.
 
 ```json
 {
-  "source": "deskolas",
-  "event": "ticket.promoted",
-  "idempotency_key": "PS-0005",
-  "ticket": {
-    "reference": "PS-0005",
-    "title": "Zoom mic not picking up audio in class",
-    "category": "Hardware and AV",
-    "priority": "low",
-    "problem": "Mic shows no input in Zoom during class, works in other apps.",
-    "solution": "Switched Zoom input to the USB headset and turned off exclusive mode in Windows sound. Confirmed in a test call.",
-    "resolved_by": "Andre T.",
-    "resolved_at": "2026-06-28T14:50:00Z",
-    "source_url": "https://deskolas.app/tickets/PS-0005"
-  }
+  "type": "Resolved Ticket",
+  "title": "Zoom mic not picking up audio in class",
+  "content": "Problem: Mic shows no input in Zoom during class...\n\nSolution: Switched Zoom input to the USB headset...",
+  "track": "Hardware and AV",
+  "author": "Andre T.",
+  "url": "https://deskolas.example/tickets/PS-0005",
+  "reference_id": "PS-0005"
 }
 ```
 
-Expected response: `202 Accepted` with `{ "submission_id": "..." }`.
+- `content` combines the ticket description (problem) and resolution notes
+  (solution), each labelled. The admin can leave the notes out at promote time.
+- `track` is our free-text category. Their Normalization Engine maps it to their
+  canonical domain in the staging queue, so we stay decoupled from their
+  taxonomy.
+- `reference_id` (the PS-#### reference) is the idempotency key. Their table
+  rejects duplicates, so a retry never creates a second submission.
+
+Response: `201 Created` with a JSON array holding the new row, including its
+`id`. A duplicate `reference_id` returns `409`, which we treat as already
+submitted. We retry `5xx` and network failures with exponential backoff, and do
+not retry other `4xx`.
 
 ### Learners Hub to Deskolas (on publish)
 
 `POST {deskolas_base}/api/kb/published`
 
-Headers: `Authorization: Bearer <shared secret>`
+Headers: `Authorization: Bearer {KB_WEBHOOK_SECRET}`
 
 ```json
 {
   "reference": "PS-0005",
-  "status": "published",
-  "article_url": "https://learners-hub.bolt.host/zoom-mic"
+  "article_url": "https://learners-hub.example/zoom-mic"
 }
 ```
 
-Deskolas sets `kb_article_url` on the matching ticket and returns `200 OK`.
+Deskolas verifies the secret (constant-time), sets `kb_article_url` on the
+matching ticket, and returns `200 OK`. Unknown reference returns `404`; a bad or
+missing secret returns `401`. `reference_id`/`url` are accepted as aliases for
+`reference`/`article_url`.
 
-## Field notes
+## Configuration
 
-- `reference` is the human ticket id (PS-0005) and doubles as the join key
-  between the two systems.
-- `idempotency_key` = the reference, so a re-send never creates a duplicate
-  submission.
-- `problem` is the ticket description; `solution` is the resolution notes.
-- `resolved_by` is a display name only. The opener's identity is left out unless
-  the KB team needs it.
+Three server-only env vars, exchanged with the KB team over a secure channel and
+never committed (see `.env.example`):
+
+- `KB_SUBMISSIONS_URL`, `KB_API_KEY` for the outbound POST.
+- `KB_WEBHOOK_SECRET` for the inbound webhook.
+
+When the outbound pair is unset, promote still records the local candidate flag
+and simply skips the handoff, so the app works without KB wired up.
+
+## Data model
+
+`tickets` carries the bridge fields: `is_candidate_article` (promoted intent),
+`kb_submission_id` and `kb_submitted_at` (handed off, with their id), and
+`kb_article_url` (published back). The three visible states on the ticket are
+Promote available, Sent to Learners Hub, and In Knowledge Base.
 
 ## Security
 
-- Both calls are server to server. The shared secret never reaches the browser.
-- Deskolas keeps the secret in a server-only env var (not `NEXT_PUBLIC`).
-- Both endpoints reject requests without a valid bearer token.
-
-## Open questions for the sync
-
-- Exact base URLs and the shape of the submissions table on their side.
-- Do they want tags or a category mapping, or is our free-text category enough?
-- Retry and failure handling if a submission POST fails (Deskolas can retry with
-  the same idempotency key).
+- Both calls are server to server. No secret reaches the browser (none are
+  `NEXT_PUBLIC`).
+- The outbound key is sent only to the KB endpoint. The inbound webhook rejects
+  any request without the shared secret, compared in constant time.
+- The webhook writes with the service role because there is no user session; it
+  only ever sets `kb_article_url` on the referenced ticket.

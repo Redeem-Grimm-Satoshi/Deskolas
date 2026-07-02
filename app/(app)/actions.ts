@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { submitToKb } from "@/lib/kb";
 import { getSessionProfile } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
 import type { TicketStatus } from "@/lib/tickets";
@@ -111,14 +112,66 @@ export async function updateTicketMeta(
   return {};
 }
 
-export async function promoteTicket(ticketId: string): Promise<Result> {
+// Promote a resolved ticket to the Learners Hub knowledge base: mark it a
+// candidate locally, then hand it off to their submissions API. The local flag
+// is set first so the intent survives even if the handoff needs a retry (the
+// reference is the idempotency key, so re-promoting is safe).
+export async function promoteTicket(
+  ticketId: string,
+  options: { includeNotes?: boolean } = {},
+): Promise<Result> {
+  const { includeNotes = true } = options;
   const supabase = await createClient();
-  const { error } = await supabase
+
+  const { data: ticket } = await supabase
+    .from("tickets")
+    .select(
+      "id, reference, title, description, category, status, resolution_notes, assignee:profiles!tickets_assigned_to_fkey(full_name)",
+    )
+    .eq("id", ticketId)
+    .maybeSingle();
+
+  if (!ticket) return { error: "Ticket not found." };
+  if (ticket.status !== "resolved" && ticket.status !== "closed") {
+    return {
+      error: "Resolve the ticket before sending it to the Knowledge Base.",
+    };
+  }
+
+  const { error: flagError } = await supabase
     .from("tickets")
     .update({ is_candidate_article: true })
     .eq("id", ticketId);
-  if (error) return { error: "Could not promote the ticket." };
+  if (flagError) return { error: "Could not promote the ticket." };
+
+  const assignee = ticket.assignee as { full_name: string } | null;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+  const result = await submitToKb({
+    reference: ticket.reference,
+    title: ticket.title,
+    problem: ticket.description,
+    solution: includeNotes ? (ticket.resolution_notes ?? "") : "",
+    category: ticket.category,
+    resolvedBy: assignee?.full_name ?? "Deskolas",
+    sourceUrl: `${siteUrl}/tickets/${ticket.reference}`,
+  });
+
+  if (!result.ok) {
+    revalidateLists();
+    revalidatePath(`/tickets/${ticket.reference}`);
+    return { error: result.error };
+  }
+
+  await supabase
+    .from("tickets")
+    .update({
+      kb_submission_id: result.submissionId,
+      kb_submitted_at: new Date().toISOString(),
+    })
+    .eq("id", ticketId);
+
   revalidateLists();
+  revalidatePath(`/tickets/${ticket.reference}`);
   return {};
 }
 
