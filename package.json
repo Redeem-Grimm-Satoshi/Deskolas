@@ -16,6 +16,7 @@
     "db:push": "supabase db push --db-url \"$POSTGRES_URL_NON_POOLING\"",
     "db:seed": "node --env-file=.env.local scripts/seed.mjs",
     "db:verify": "node --env-file=.env.local scripts/verify-rls.mjs",
+    "db:invite": "node --env-file=.env.local scripts/invite.mjs",
     "prepare": "husky"
   },
   "lint-staged": {

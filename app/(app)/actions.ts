@@ -140,7 +140,9 @@ export async function addComment(
   return {};
 }
 
-export async function sendInvite(email: string, role: string): Promise<Result> {
+// Adds the email to the sign-up allowlist. No email is sent; the inviter tells
+// the person to sign up with this address.
+export async function addInvite(email: string, role: string): Promise<Result> {
   const trimmed = email.trim().toLowerCase();
   if (!trimmed) return { error: "Enter an email to invite." };
 
@@ -154,7 +156,7 @@ export async function sendInvite(email: string, role: string): Promise<Result> {
       { email: trimmed, role, invited_by: profile.id },
       { onConflict: "email" },
     );
-  if (error) return { error: "Could not send the invite." };
+  if (error) return { error: "Could not add the invite." };
   revalidatePath("/people");
   return {};
 }

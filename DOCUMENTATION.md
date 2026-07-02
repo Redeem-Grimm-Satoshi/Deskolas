@@ -128,12 +128,34 @@ Workflow:
   demo sign-in credentials.
 - `npm run db:verify` runs the RLS checks against the live database (read-all
   allowed, editing someone else's ticket blocked, claim works).
+- `npm run db:invite -- email [member|admin]` adds an email to the sign-up
+  allowlist from the command line (bootstrap and break-glass).
 
 Types live in `types/database.ts`. The CLI generator needs Docker, which we
 avoid, so the types are kept in sync with the migrations by hand for now; the
 file documents how to regenerate once a Supabase access token is configured.
 
 ## Auth and data flow
+
+How people get in, end to end:
+
+1. **Bootstrap the first admin.** The invite list is admin-managed, and no admin
+   exists on a fresh database, so the first one is added from the command line
+   with the service key: `npm run db:invite -- you@example.com admin`. That
+   person signs up and lands as admin. The same command is the break-glass tool
+   if every admin is ever locked out.
+2. **Admins invite everyone else** on the People screen. Adding an email writes
+   the allowlist row; no email is sent. The inviter tells the person to sign up
+   with that address.
+3. **Invitees join** with email and password or Continue with Google. Both paths
+   go through the same database trigger, which creates the profile only for
+   allowlisted emails, so OAuth cannot bypass the invite gate. An uninvited
+   sign-up (either path) lands on the access-denied screen.
+
+Google is the only OAuth provider. GitHub was dropped because it often reports a
+private noreply address that cannot match the invite allowlist, so invited
+people would be rejected. Google OAuth still needs the provider configured in
+the Supabase dashboard; email and password works out of the box.
 
 - Middleware (`middleware.ts`) refreshes the Supabase session on every request
   and gates routes: no user reaches an `(app)` route, and a signed-in user is
@@ -189,3 +211,8 @@ Demo logins after `npm run db:seed`: any cohort email with the password
   queries, and the ticket and people mutations as server actions. Removed the
   mock layer. Verified the login, role routing, and self-claim flows against the
   live database.
+- 2026-07-02, auth workflow: rejected OAuth sign-ups now land on the
+  access-denied screen (which shows the attempted email when known), added the
+  `db:invite` bootstrap command for the first admin, made the People invite copy
+  say what it does (allowlist, no email sent), and dropped the GitHub button
+  (its private noreply emails cannot match the allowlist).

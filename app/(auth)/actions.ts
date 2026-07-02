@@ -58,7 +58,7 @@ export async function signUp(
       return { error: "That email already has an account. Sign in instead." };
     }
     // The invite gate rejects emails that are not on the allowlist.
-    redirect("/access-denied");
+    redirect(`/access-denied?email=${encodeURIComponent(email)}`);
   }
 
   // With email confirmation on, there is no session yet: point them to email.
@@ -66,10 +66,12 @@ export async function signUp(
   redirect("/");
 }
 
-export async function signInWithProvider(provider: "google" | "github") {
+// Google only. GitHub is out because it often reports a private noreply email
+// that cannot match the invite allowlist, so invited people would be rejected.
+export async function signInWithGoogle() {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider,
+    provider: "google",
     options: { redirectTo: `${await origin()}/auth/callback` },
   });
   if (error || !data.url) redirect("/sign-in");
