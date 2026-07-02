@@ -162,7 +162,11 @@ export default async function DashboardPage() {
                       key={index}
                       className="flex items-center gap-2.5 text-[13px]"
                     >
-                      <Avatar name={event.actorName} size={20} />
+                      <Avatar
+                        name={event.actorName}
+                        src={event.actorAvatarUrl}
+                        size={20}
+                      />
                       <p className="text-text-2">
                         <span className="text-text font-medium">
                           {event.actorName}

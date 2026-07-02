@@ -15,6 +15,7 @@ export type SessionProfile = {
   fullName: string;
   email: string;
   role: Role;
+  avatarUrl: string | null;
 };
 
 export const TICKET_STATUSES = [

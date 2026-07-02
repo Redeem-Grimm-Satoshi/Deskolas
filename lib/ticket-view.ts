@@ -42,7 +42,9 @@ export function ticketCardProps(ticket: TicketView) {
     status: ticket.status,
     priority: ticket.priority,
     category: ticket.category,
-    assignee: ticket.assigneeName ? { name: ticket.assigneeName } : null,
+    assignee: ticket.assigneeName
+      ? { name: ticket.assigneeName, src: ticket.assigneeAvatarUrl }
+      : null,
     updatedLabel: relativeTime(ticket.updatedAt),
     href: `/tickets/${ticket.reference}`,
   };

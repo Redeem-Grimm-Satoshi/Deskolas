@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 
 import { signOut } from "@/app/(auth)/actions";
-import { updateProfileName } from "@/app/(app)/actions";
+import { updateProfileAvatar, updateProfileName } from "@/app/(app)/actions";
 import { AppTopBar } from "@/components/app/app-top-bar";
 import { useSession } from "@/components/providers/session-provider";
 import { Avatar } from "@/components/ui/avatar";
@@ -13,7 +13,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Toggle } from "@/components/ui/toggle";
 import { useToast } from "@/components/ui/toast";
+import { createClient } from "@/lib/supabase/client";
 import { ROLE_LABELS } from "@/lib/tickets";
+
+const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
+const AVATAR_TYPES: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+};
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
@@ -29,12 +36,58 @@ export default function SettingsPage() {
   const toast = useToast();
   const [name, setName] = React.useState(user.fullName);
   const [saving, setSaving] = React.useState(false);
+  const [uploading, setUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   async function save() {
     setSaving(true);
     const result = await updateProfileName(name);
     setSaving(false);
     toast({ message: result.error ?? "Profile saved" });
+    router.refresh();
+  }
+
+  async function uploadAvatar(file: File) {
+    const ext = AVATAR_TYPES[file.type];
+    if (!ext) {
+      toast({ message: "Use a JPG or PNG image." });
+      return;
+    }
+    if (file.size > MAX_AVATAR_BYTES) {
+      toast({ message: "That image is too large. Use one under 2 MB." });
+      return;
+    }
+
+    setUploading(true);
+    const supabase = createClient();
+    // A timestamped name sidesteps CDN caching of a replaced image; the old
+    // files are cleaned up best effort.
+    const path = `${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("avatars")
+      .upload(path, file, { contentType: file.type });
+
+    if (error) {
+      setUploading(false);
+      toast({ message: "Could not upload the photo. Try again." });
+      return;
+    }
+
+    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+    const result = await updateProfileAvatar(data.publicUrl);
+
+    const { data: existing } = await supabase.storage
+      .from("avatars")
+      .list(user.id);
+    const stale = (existing ?? [])
+      .filter((item) => `${user.id}/${item.name}` !== path)
+      .map((item) => `${user.id}/${item.name}`);
+    if (stale.length > 0) {
+      await supabase.storage.from("avatars").remove(stale);
+    }
+
+    setUploading(false);
+    toast({ message: result.error ?? "Photo updated" });
     router.refresh();
   }
 
@@ -48,9 +101,27 @@ export default function SettingsPage() {
 
         <Card>
           <div className="flex items-center gap-4">
-            <Avatar name={user.fullName} size={56} />
+            <Avatar name={user.fullName} src={user.avatarUrl} size={56} />
             <div>
-              <Button variant="secondary">Change photo</Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg"
+                className="hidden"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) uploadAvatar(file);
+                  event.target.value = "";
+                }}
+              />
+              <Button
+                variant="secondary"
+                loading={uploading}
+                loadingText="Uploading"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Change photo
+              </Button>
               <p className="text-text-muted mt-1.5 text-[12px]">
                 JPG or PNG, under 2 MB.
               </p>

@@ -71,7 +71,7 @@ export function AppTopBar({
         {actions}
         <ThemeToggle />
         <NotificationsBell />
-        <Avatar name={user.fullName} size={32} />
+        <Avatar name={user.fullName} src={user.avatarUrl} size={32} />
       </div>
     </header>
   );

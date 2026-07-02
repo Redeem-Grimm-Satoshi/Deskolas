@@ -98,7 +98,7 @@ export function TicketDetail({
 }: {
   ticket: TicketView;
   comments: CommentView[];
-  profiles: { id: string; fullName: string }[];
+  profiles: { id: string; fullName: string; avatarUrl: string | null }[];
   role: Role;
   currentUserId: string;
 }) {
@@ -168,8 +168,11 @@ export function TicketDetail({
     if (ok) setDraft("");
   }
 
+  const assigneeProfile = assigneeId
+    ? profiles.find((p) => p.id === assigneeId)
+    : undefined;
   const assigneeName = assigneeId
-    ? (profiles.find((p) => p.id === assigneeId)?.fullName ?? "Unknown")
+    ? (assigneeProfile?.fullName ?? "Unknown")
     : null;
   const assigneeOptions = [
     { value: UNASSIGNED, label: "Unassigned" },
@@ -273,7 +276,11 @@ export function TicketDetail({
             <Overline>Activity</Overline>
             <div className="mt-3 flex flex-col gap-3.5">
               <div className="flex items-center gap-2.5 text-[13px]">
-                <Avatar name={ticket.submitterName} size={20} />
+                <Avatar
+                  name={ticket.submitterName}
+                  src={ticket.submitterAvatarUrl}
+                  size={20}
+                />
                 <p className="text-text-2">
                   <span className="text-text font-medium">
                     {ticket.submitterName}
@@ -286,7 +293,11 @@ export function TicketDetail({
               </div>
               {comments.map((comment) => (
                 <div key={comment.id} className="flex gap-2.5">
-                  <Avatar name={comment.authorName} size={20} />
+                  <Avatar
+                    name={comment.authorName}
+                    src={comment.authorAvatarUrl}
+                    size={20}
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="text-[13px]">
                       <span className="text-text font-medium">
@@ -445,7 +456,11 @@ export function TicketDetail({
                   <RailField label="Assignee">
                     {assigneeName ? (
                       <span className="flex items-center gap-1.5">
-                        <Avatar name={assigneeName} size={18} />
+                        <Avatar
+                          name={assigneeName}
+                          src={assigneeProfile?.avatarUrl}
+                          size={18}
+                        />
                         {assigneeName}
                       </span>
                     ) : (

@@ -175,6 +175,38 @@ export async function updateMemberRole(
   return {};
 }
 
+// The file itself is uploaded from the browser (storage RLS limits people to
+// their own folder); this records the resulting URL, and only one that really
+// points into the caller's own avatar folder.
+export async function updateProfileAvatar(url: string): Promise<Result> {
+  const profile = await getSessionProfile();
+  if (!profile) return { error: "Sign in first." };
+
+  const prefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/${profile.id}/`;
+  if (!url.startsWith(prefix)) {
+    return { error: "That file is not your avatar." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ avatar_url: url })
+    .eq("id", profile.id);
+  if (error) return { error: "Could not save your photo." };
+  revalidatePath("/", "layout");
+  return {};
+}
+
+export async function markAllNotificationsRead(): Promise<Result> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("notifications")
+    .update({ read: true })
+    .eq("read", false);
+  if (error) return { error: "Could not mark notifications read." };
+  return {};
+}
+
 export async function updateProfileName(fullName: string): Promise<Result> {
   const trimmed = fullName.trim();
   if (!trimmed) return { error: "Name cannot be empty." };
