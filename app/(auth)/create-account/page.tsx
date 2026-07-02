@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useActionState } from "react";
 
-import { GithubIcon, GoogleIcon } from "@/components/ui/brand-icons";
+import { GoogleIcon } from "@/components/ui/brand-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BrandMark } from "@/components/ui/logo";
-import { signInWithProvider, signUp } from "../actions";
+import { signInWithGoogle, signUp } from "../actions";
 
 export default function CreateAccountPage() {
   const [state, formAction, pending] = useActionState(signUp, {});
@@ -25,24 +25,14 @@ export default function CreateAccountPage() {
       </div>
 
       <div className="rounded-card border-border bg-surface border p-6">
-        <div className="flex flex-col gap-2.5">
-          <Button
-            variant="secondary"
-            className="w-full"
-            onClick={() => signInWithProvider("google")}
-          >
-            <GoogleIcon className="size-4" />
-            Continue with Google
-          </Button>
-          <Button
-            variant="secondary"
-            className="w-full"
-            onClick={() => signInWithProvider("github")}
-          >
-            <GithubIcon className="size-4" />
-            Continue with GitHub
-          </Button>
-        </div>
+        <Button
+          variant="secondary"
+          className="w-full"
+          onClick={() => signInWithGoogle()}
+        >
+          <GoogleIcon className="size-4" />
+          Continue with Google
+        </Button>
 
         <div className="my-5 flex items-center gap-3">
           <span className="bg-border h-px flex-1" />

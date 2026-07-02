@@ -4,7 +4,7 @@ import { Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-import { sendInvite, updateMemberRole } from "@/app/(app)/actions";
+import { addInvite, updateMemberRole } from "@/app/(app)/actions";
 import { AppTopBar } from "@/components/app/app-top-bar";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -38,13 +38,13 @@ export function PeopleTable({
   async function submitInvite() {
     if (!invite.trim()) return;
     setSending(true);
-    const result = await sendInvite(invite, inviteRole);
+    const result = await addInvite(invite, inviteRole);
     setSending(false);
     if (result.error) {
       toast({ message: result.error });
       return;
     }
-    toast({ message: `Invite sent to ${invite.trim()}` });
+    toast({ message: `${invite.trim()} added to the invite list` });
     setInvite("");
     router.refresh();
   }
@@ -80,12 +80,13 @@ export function PeopleTable({
               aria-label="Invite role"
             />
             <Button onClick={submitInvite} loading={sending}>
-              Send invite
+              Add to invite list
             </Button>
           </div>
           <p className="text-text-muted mt-2.5 text-[12px]">
-            Invite anyone in Per Scholas by email. Admin is granted here, never
-            chosen at sign-up.
+            Invite anyone in Per Scholas by email, then tell them to sign up
+            with it (password or Google). No email is sent. Admin is granted
+            here, never chosen at sign-up.
           </p>
         </section>
 
