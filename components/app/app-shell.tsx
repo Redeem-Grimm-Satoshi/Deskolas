@@ -2,6 +2,7 @@
 
 import { SessionProvider } from "@/components/providers/session-provider";
 import type { SessionProfile } from "@/lib/tickets";
+import { LiveRefresh } from "./live-refresh";
 import { Sidebar } from "./sidebar";
 
 export function AppShell({
@@ -13,6 +14,7 @@ export function AppShell({
 }) {
   return (
     <SessionProvider profile={profile}>
+      <LiveRefresh />
       <div className="bg-bg flex min-h-dvh">
         <aside className="sticky top-0 hidden h-dvh shrink-0 lg:flex">
           <Sidebar />

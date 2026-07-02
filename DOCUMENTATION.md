@@ -171,6 +171,34 @@ the Supabase dashboard; email and password works out of the box.
 - The signed-in profile is fetched once per request (`getSessionProfile`,
   React-cached) and passed into a small client `SessionProvider` for the chrome.
 
+## Live updates and notifications
+
+- Tickets, comments, and notifications are in the Supabase Realtime publication.
+  `LiveRefresh` (mounted in the app shell) subscribes to ticket and comment
+  changes and re-renders the current route's server components, so lists, the
+  dashboard, and open detail pages stay current without a manual refresh.
+- Notifications are rows written by database triggers, so every write path
+  produces them consistently: a new ticket notifies the admins, an assignment or
+  claim notifies the people involved, a status change notifies the opener and
+  assignee, and a comment notifies the other participants. Triggers never notify
+  the actor about their own change and skip service-role paths like the seed.
+- The bell is a client component: it loads the person's notifications, receives
+  new ones over a realtime subscription filtered to their user id (RLS also
+  guarantees they can only ever read their own), and marks all read via a server
+  action.
+- Realtime subscriptions set the user's token on the socket before joining;
+  `postgres_changes` binds its RLS claims at join time, so an anonymous join
+  would silently deliver nothing.
+
+## Profile photos
+
+Avatars live in a public `avatars` storage bucket, one folder per user id, with
+storage policies restricting writes to your own folder and the bucket enforcing
+the 2 MB and JPG/PNG limits server-side. The browser uploads the file directly
+(storage RLS applies), then a server action records the public URL on the
+profile after checking it points into the caller's own folder. The `Avatar`
+component falls back to initials wherever no photo exists.
+
 Demo logins after `npm run db:seed`: any cohort email with the password
 `deskolas123`. Admins are `andre@cohort.dev` and `maria@cohort.dev`; members are
 `priya@`, `redeem@`, and `jose@`.
@@ -216,3 +244,7 @@ Demo logins after `npm run db:seed`: any cohort email with the password
   `db:invite` bootstrap command for the first admin, made the People invite copy
   say what it does (allowlist, no email sent), and dropped the GitHub button
   (its private noreply emails cannot match the allowlist).
+- 2026-07-02, live app: profile photo uploads (storage bucket with per-user
+  policies, avatars threaded through the whole UI), trigger-written
+  notifications with a live bell, and realtime updates so ticket and comment
+  changes appear everywhere without a refresh.

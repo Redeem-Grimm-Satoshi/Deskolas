@@ -27,7 +27,7 @@ export const getSessionProfile = cache(
 
     const { data } = await supabase
       .from("profiles")
-      .select("id, full_name, email, role")
+      .select("id, full_name, email, role, avatar_url")
       .eq("id", user.id)
       .maybeSingle();
     if (!data) return null;
@@ -37,11 +37,16 @@ export const getSessionProfile = cache(
       fullName: data.full_name,
       email: data.email ?? user.email ?? "",
       role: data.role as Role,
+      avatarUrl: data.avatar_url,
     };
   },
 );
 
-type Named = { id: string; full_name: string } | null;
+type Named = {
+  id: string;
+  full_name: string;
+  avatar_url: string | null;
+} | null;
 
 type TicketRow = {
   id: string;
@@ -66,8 +71,8 @@ const TICKET_SELECT = `
   id, reference, title, description, category, priority, status,
   submitted_by, assigned_to, resolution_notes, is_candidate_article,
   kb_article_url, created_at, updated_at,
-  submitter:profiles!tickets_submitted_by_fkey(id, full_name),
-  assignee:profiles!tickets_assigned_to_fkey(id, full_name)
+  submitter:profiles!tickets_submitted_by_fkey(id, full_name, avatar_url),
+  assignee:profiles!tickets_assigned_to_fkey(id, full_name, avatar_url)
 `;
 
 export type TicketView = {
@@ -80,8 +85,10 @@ export type TicketView = {
   status: TicketStatus;
   submitterId: string;
   submitterName: string;
+  submitterAvatarUrl: string | null;
   assigneeId: string | null;
   assigneeName: string | null;
+  assigneeAvatarUrl: string | null;
   resolutionNotes: string | null;
   isCandidate: boolean;
   kbUrl: string | null;
@@ -100,8 +107,10 @@ function toView(row: TicketRow): TicketView {
     status: row.status,
     submitterId: row.submitted_by,
     submitterName: row.submitter?.full_name ?? "Unknown",
+    submitterAvatarUrl: row.submitter?.avatar_url ?? null,
     assigneeId: row.assigned_to,
     assigneeName: row.assignee?.full_name ?? null,
+    assigneeAvatarUrl: row.assignee?.avatar_url ?? null,
     resolutionNotes: row.resolution_notes,
     isCandidate: row.is_candidate_article,
     kbUrl: row.kb_article_url,
@@ -145,6 +154,7 @@ export type CommentView = {
   id: string;
   body: string;
   authorName: string;
+  authorAvatarUrl: string | null;
   timeLabel: string;
 };
 
@@ -153,7 +163,7 @@ export async function listComments(ticketId: string): Promise<CommentView[]> {
   const { data } = await supabase
     .from("comments")
     .select(
-      "id, body, created_at, author:profiles!comments_author_id_fkey(id, full_name)",
+      "id, body, created_at, author:profiles!comments_author_id_fkey(id, full_name, avatar_url)",
     )
     .eq("ticket_id", ticketId)
     .order("created_at", { ascending: true });
@@ -162,13 +172,14 @@ export async function listComments(ticketId: string): Promise<CommentView[]> {
     id: string;
     body: string;
     created_at: string;
-    author: { full_name: string } | null;
+    author: { full_name: string; avatar_url: string | null } | null;
   }[];
 
   return rows.map((row) => ({
     id: row.id,
     body: row.body,
     authorName: row.author?.full_name ?? "Unknown",
+    authorAvatarUrl: row.author?.avatar_url ?? null,
     timeLabel: relativeTime(row.created_at),
   }));
 }
@@ -178,6 +189,7 @@ export type PersonView = {
   fullName: string;
   email: string;
   role: Role;
+  avatarUrl: string | null;
   joinedAt: string;
 };
 
@@ -185,7 +197,7 @@ export async function listProfiles(): Promise<PersonView[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
-    .select("id, full_name, email, role, created_at")
+    .select("id, full_name, email, role, avatar_url, created_at")
     .order("created_at", { ascending: true });
 
   return (data ?? []).map((row) => ({
@@ -193,6 +205,7 @@ export async function listProfiles(): Promise<PersonView[]> {
     fullName: row.full_name,
     email: row.email ?? "",
     role: row.role as Role,
+    avatarUrl: row.avatar_url,
     joinedAt: row.created_at,
   }));
 }
@@ -232,6 +245,7 @@ export type DashboardData = {
   needsAttention: TicketView[];
   recentActivity: {
     actorName: string;
+    actorAvatarUrl: string | null;
     action: string;
     reference: string;
     timeLabel: string;
@@ -289,6 +303,9 @@ export async function getDashboard(): Promise<DashboardData> {
       if (t.status === "resolved" || t.status === "closed") {
         return {
           actorName: t.assigneeName ?? t.submitterName,
+          actorAvatarUrl: t.assigneeName
+            ? t.assigneeAvatarUrl
+            : t.submitterAvatarUrl,
           action: t.status === "closed" ? "closed" : "resolved",
           reference: t.reference,
           timeLabel: relativeTime(t.updatedAt),
@@ -296,6 +313,7 @@ export async function getDashboard(): Promise<DashboardData> {
       }
       return {
         actorName: t.submitterName,
+        actorAvatarUrl: t.submitterAvatarUrl,
         action: "opened",
         reference: t.reference,
         timeLabel: relativeTime(t.createdAt),

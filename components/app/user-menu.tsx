@@ -42,7 +42,7 @@ export function UserMenu() {
           focusRing,
         )}
       >
-        <Avatar name={user.fullName} size={30} />
+        <Avatar name={user.fullName} src={user.avatarUrl} size={30} />
         <span className="min-w-0 flex-1">
           <span className="text-text block truncate text-[13px] font-medium">
             {user.fullName}

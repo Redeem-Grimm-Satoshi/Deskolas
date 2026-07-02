@@ -112,7 +112,11 @@ export function PeopleTable({
                 className="border-border grid grid-cols-[1fr_auto_auto] items-center gap-x-4 border-t px-5 py-3"
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <Avatar name={member.fullName} size={32} />
+                  <Avatar
+                    name={member.fullName}
+                    src={member.avatarUrl}
+                    size={32}
+                  />
                   <div className="min-w-0">
                     <p className="text-text truncate text-[14px] font-medium">
                       {member.fullName}

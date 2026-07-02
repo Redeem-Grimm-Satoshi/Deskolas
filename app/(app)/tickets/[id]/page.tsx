@@ -30,7 +30,11 @@ export default async function TicketDetailPage({
     <TicketDetail
       ticket={ticket}
       comments={comments}
-      profiles={people.map((p) => ({ id: p.id, fullName: p.fullName }))}
+      profiles={people.map((p) => ({
+        id: p.id,
+        fullName: p.fullName,
+        avatarUrl: p.avatarUrl,
+      }))}
       role={profile.role}
       currentUserId={profile.id}
     />
