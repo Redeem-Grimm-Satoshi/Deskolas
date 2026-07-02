@@ -61,6 +61,7 @@ type TicketRow = {
   resolution_notes: string | null;
   is_candidate_article: boolean;
   kb_article_url: string | null;
+  kb_submitted_at: string | null;
   created_at: string;
   updated_at: string;
   submitter: Named;
@@ -70,7 +71,7 @@ type TicketRow = {
 const TICKET_SELECT = `
   id, reference, title, description, category, priority, status,
   submitted_by, assigned_to, resolution_notes, is_candidate_article,
-  kb_article_url, created_at, updated_at,
+  kb_article_url, kb_submitted_at, created_at, updated_at,
   submitter:profiles!tickets_submitted_by_fkey(id, full_name, avatar_url),
   assignee:profiles!tickets_assigned_to_fkey(id, full_name, avatar_url)
 `;
@@ -92,6 +93,7 @@ export type TicketView = {
   resolutionNotes: string | null;
   isCandidate: boolean;
   kbUrl: string | null;
+  kbSubmittedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -114,6 +116,7 @@ function toView(row: TicketRow): TicketView {
     resolutionNotes: row.resolution_notes,
     isCandidate: row.is_candidate_article,
     kbUrl: row.kb_article_url,
+    kbSubmittedAt: row.kb_submitted_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

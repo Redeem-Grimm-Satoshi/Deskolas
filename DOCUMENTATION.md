@@ -248,3 +248,8 @@ Demo logins after `npm run db:seed`: any cohort email with the password
   policies, avatars threaded through the whole UI), trigger-written
   notifications with a live bell, and realtime updates so ticket and comment
   changes appear everywhere without a refresh.
+- 2026-07-02, knowledge base integration: promoting a resolved ticket now hands
+  it off to the Learners Hub submissions API (idempotent on the reference, with
+  retry and backoff), an `/api/kb/published` webhook records the published
+  article URL back, and the ticket shows the Promote, Sent, and In Knowledge
+  Base states. All behind server-only env vars; see `docs/kb-integration.md`.

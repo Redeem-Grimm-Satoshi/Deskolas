@@ -134,6 +134,8 @@ export type Database = {
           resolution_notes: string | null;
           is_candidate_article: boolean;
           kb_article_url: string | null;
+          kb_submission_id: string | null;
+          kb_submitted_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -150,6 +152,8 @@ export type Database = {
           resolution_notes?: string | null;
           is_candidate_article?: boolean;
           kb_article_url?: string | null;
+          kb_submission_id?: string | null;
+          kb_submitted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -166,6 +170,8 @@ export type Database = {
           resolution_notes?: string | null;
           is_candidate_article?: boolean;
           kb_article_url?: string | null;
+          kb_submission_id?: string | null;
+          kb_submitted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

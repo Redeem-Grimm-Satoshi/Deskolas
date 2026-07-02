@@ -25,7 +25,7 @@ import { StatusPill } from "@/components/ui/status-pill";
 import { Textarea } from "@/components/ui/textarea";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useToast } from "@/components/ui/toast";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Check, ExternalLink } from "lucide-react";
 import { dateTimeLabel, relativeTime } from "@/lib/format";
 import type { CommentView, TicketView } from "@/lib/queries";
 import { SPINE_CLASS } from "@/lib/ticket-view";
@@ -490,18 +490,55 @@ export function TicketDetail({
 
           {isAdmin ? (
             <Panel>
-              <Button
-                variant="secondary"
-                className="w-full"
-                onClick={() => setPromoteOpen(true)}
-              >
-                <BookOpen className="size-4" strokeWidth={1.5} />
-                Promote to Knowledge Base
-              </Button>
-              <p className="text-text-muted mt-2 text-[12px] leading-[18px]">
-                Flag a generally useful fix as a candidate article for Learners
-                Hub.
-              </p>
+              {ticket.kbUrl ? (
+                <>
+                  <a
+                    href={ticket.kbUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-accent-text flex items-center gap-2 text-[14px] font-medium"
+                  >
+                    <BookOpen className="size-4" strokeWidth={1.5} />
+                    View in Knowledge Base
+                    <ExternalLink className="size-3.5" strokeWidth={1.5} />
+                  </a>
+                  <p className="text-text-muted mt-2 text-[12px] leading-[18px]">
+                    Learners Hub published this fix as an article.
+                  </p>
+                </>
+              ) : ticket.kbSubmittedAt ? (
+                <>
+                  <p className="text-text flex items-center gap-2 text-[14px] font-medium">
+                    <Check
+                      className="text-st-resolved size-4"
+                      strokeWidth={2}
+                    />
+                    Sent to Learners Hub
+                  </p>
+                  <p className="text-text-muted mt-2 text-[12px] leading-[18px]">
+                    Waiting for the Learners Hub team to review and publish.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="secondary"
+                    className="w-full"
+                    disabled={status !== "resolved" && status !== "closed"}
+                    onClick={() => setPromoteOpen(true)}
+                  >
+                    <BookOpen className="size-4" strokeWidth={1.5} />
+                    {ticket.isCandidate
+                      ? "Retry Learners Hub handoff"
+                      : "Promote to Knowledge Base"}
+                  </Button>
+                  <p className="text-text-muted mt-2 text-[12px] leading-[18px]">
+                    {status === "resolved" || status === "closed"
+                      ? "Send a generally useful fix to Learners Hub as a candidate article."
+                      : "Resolve this ticket to send it to the Knowledge Base."}
+                  </p>
+                </>
+              )}
             </Panel>
           ) : assigneeId && assigneeId !== currentUserId ? (
             <p className="text-text-muted px-1 text-[12px] leading-[18px]">
@@ -532,7 +569,7 @@ export function TicketDetail({
               disabled={busy}
               onClick={async () => {
                 const ok = await run(
-                  promoteTicket(ticket.id),
+                  promoteTicket(ticket.id, { includeNotes }),
                   `${ticket.reference} sent to the Learners Hub team`,
                 );
                 if (ok) setPromoteOpen(false);
