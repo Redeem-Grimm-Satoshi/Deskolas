@@ -62,7 +62,9 @@ export async function signUp(
   }
 
   // With email confirmation on, there is no session yet: point them to email.
-  if (!data.session) redirect("/check-email");
+  if (!data.session) {
+    redirect(`/check-email?intent=confirm&email=${encodeURIComponent(email)}`);
+  }
   redirect("/");
 }
 
@@ -90,7 +92,7 @@ export async function requestPasswordReset(
     redirectTo: `${await origin()}/set-new-password`,
   });
   // Always report success so the form does not reveal who has an account.
-  redirect("/check-email");
+  redirect(`/check-email?intent=reset&email=${encodeURIComponent(email)}`);
 }
 
 export async function updatePassword(
