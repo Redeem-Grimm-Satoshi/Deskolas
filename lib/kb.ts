@@ -60,6 +60,9 @@ export async function submitToKb(ticket: KbTicket): Promise<KbSubmitResult> {
     content: buildContent(ticket.problem, ticket.solution),
     track: ticket.category,
     author: ticket.resolvedBy,
+    // Same person as author; their table requires full_name (it drives the
+    // Wall of Fame placard) and rejects rows without it.
+    full_name: ticket.resolvedBy,
     url: ticket.sourceUrl,
     reference_id: ticket.reference,
   });

@@ -43,10 +43,14 @@ Headers: `apikey: {KB_API_KEY}`, `Authorization: Bearer {KB_API_KEY}`,
   "content": "Problem: Mic shows no input in Zoom during class...\n\nSolution: Switched Zoom input to the USB headset...",
   "track": "Hardware and AV",
   "author": "Andre T.",
+  "full_name": "Andre T.",
   "url": "https://deskolas.example/tickets/PS-0005",
   "reference_id": "PS-0005"
 }
 ```
+
+`full_name` duplicates `author`: their table requires it (it drives the Wall of
+Fame placard) and rejects rows without it, confirmed during the live test.
 
 - `content` combines the ticket description (problem) and resolution notes
   (solution), each labelled. The admin can leave the notes out at promote time.
