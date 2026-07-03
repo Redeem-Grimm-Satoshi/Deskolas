@@ -61,6 +61,8 @@ describe("submitToKb", () => {
     expect(sent.type).toBe("Resolved Ticket");
     expect(sent.track).toBe("Hardware and AV");
     expect(sent.reference_id).toBe("PS-0042");
+    expect(sent.author).toBe("Andre T.");
+    expect(sent.full_name).toBe("Andre T.");
     expect(sent.content).toContain("Problem: No input");
     expect(sent.content).toContain("Solution: Switched Zoom");
   });
