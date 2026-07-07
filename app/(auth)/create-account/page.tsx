@@ -51,7 +51,7 @@ export default function CreateAccountPage() {
             label="Email"
             name="email"
             type="email"
-            placeholder="you@cohort.dev"
+            placeholder="you@example.com"
             required
           />
           <Input

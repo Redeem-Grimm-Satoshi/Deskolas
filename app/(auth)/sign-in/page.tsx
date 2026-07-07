@@ -45,7 +45,7 @@ export default function SignInPage() {
             label="Email"
             name="email"
             type="email"
-            placeholder="you@cohort.dev"
+            placeholder="you@example.com"
             required
           />
           <div>
