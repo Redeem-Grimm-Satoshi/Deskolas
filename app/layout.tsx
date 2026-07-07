@@ -19,7 +19,10 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Deskolas",
+  title: {
+    default: "Deskolas",
+    template: "%s · Deskolas",
+  },
   description: "The cohort help desk.",
 };
 
