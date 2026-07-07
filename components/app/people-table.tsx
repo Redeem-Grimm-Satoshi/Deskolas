@@ -67,7 +67,7 @@ export function PeopleTable({
             <Input
               className="min-w-0"
               type="email"
-              placeholder="name@cohort.dev"
+              placeholder="name@example.com"
               aria-label="Invite email"
               value={invite}
               onChange={(event) => setInvite(event.target.value)}

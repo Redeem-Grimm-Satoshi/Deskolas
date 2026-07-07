@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
           label="Email"
           name="email"
           type="email"
-          placeholder="you@cohort.dev"
+          placeholder="you@example.com"
           required
         />
         {state.error ? (
