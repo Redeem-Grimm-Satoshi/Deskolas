@@ -8,6 +8,7 @@ Learners Hub knowledge base.
 <img width="1440" height="900" alt="Ticket queue" src="https://github.com/user-attachments/assets/dff05e23-efcb-4372-a996-594e2e348016" />
 
 ## Design System
+
 [Deskolas Design System.pdf](https://github.com/user-attachments/files/29555947/Deskolas.Design.System.pdf)
 
 ## Stack
@@ -33,6 +34,26 @@ npm run dev
 ```
 
 Open http://localhost:3000.
+
+## Contributing for the first time
+
+1. Clone the repository, switch into the app folder, and run `npm install`.
+   Deskolas needs Node 20 or newer.
+2. Ask the project owner for two things: the private `.env.local` file and an
+   app invite plus demo sign in credentials. Supabase keys are required to run
+   the app and are not committed on purpose.
+3. Start the app with `npm run dev`, then open http://localhost:3000.
+4. Visit http://localhost:3000/components before changing UI. It shows the
+   design system building blocks you should reuse.
+5. Pick an issue labeled `easy fix`, comment so nobody duplicates the work, and
+   branch from `main`. Use a short name like `fix/issue-13-placeholders`.
+6. Before opening a pull request, run `npm run lint`, `npm run typecheck`,
+   `npm run test`, and `npm run build`. All must pass, and the pre-commit hook
+   will also check formatting and fingerprints.
+7. Open one pull request per issue and mention the issue number, for example
+   `Closes #13`. Never push directly to `main`.
+8. Read `CLAUDE.md` before coding. The two rules that surprise new contributors
+   most are design tokens only and no em dashes anywhere.
 
 ## Environment
 
