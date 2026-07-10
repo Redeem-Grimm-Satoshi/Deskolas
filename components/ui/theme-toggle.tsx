@@ -15,11 +15,12 @@ export function ThemeToggle() {
     <Button
       variant="secondary"
       iconOnly
-      aria-label="Toggle theme"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >
       <Moon className="light:hidden size-4" strokeWidth={1.5} />
       <Sun className="light:block hidden size-4" strokeWidth={1.5} />
+      <span className="light:hidden sr-only">Switch to light theme</span>
+      <span className="light:inline sr-only hidden">Switch to dark theme</span>
     </Button>
   );
 }
