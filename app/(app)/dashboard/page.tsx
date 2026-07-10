@@ -76,7 +76,7 @@ export default async function DashboardPage() {
             Overview
           </h1>
           <p className="text-text-muted text-[12px]">
-            Cohort 2026-RTT-23 · updated just now
+            Cohort 2026-RTT-23
           </p>
         </div>
 
