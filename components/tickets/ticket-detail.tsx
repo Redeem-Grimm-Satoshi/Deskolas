@@ -303,7 +303,10 @@ export function TicketDetail({
                       <span className="text-text font-medium">
                         {comment.authorName}
                       </span>{" "}
-                      <span className="text-text-muted">
+                      <span
+                        className="text-text-muted"
+                        title={comment.timeTitle}
+                      >
                         · {comment.timeLabel}
                       </span>
                     </p>

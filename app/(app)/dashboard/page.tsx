@@ -178,7 +178,10 @@ export default async function DashboardPage() {
                         >
                           {event.reference}
                         </Link>{" "}
-                        <span className="text-text-muted">
+                        <span
+                          className="text-text-muted"
+                          title={event.timeTitle}
+                        >
                           · {event.timeLabel}
                         </span>
                       </p>

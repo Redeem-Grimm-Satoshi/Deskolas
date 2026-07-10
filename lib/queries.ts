@@ -4,7 +4,7 @@
 
 import { cache } from "react";
 
-import { relativeTime } from "@/lib/format";
+import { dateTimeLabel, relativeTime } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import type {
   Role,
@@ -159,6 +159,7 @@ export type CommentView = {
   authorName: string;
   authorAvatarUrl: string | null;
   timeLabel: string;
+  timeTitle: string;
 };
 
 export async function listComments(ticketId: string): Promise<CommentView[]> {
@@ -184,6 +185,7 @@ export async function listComments(ticketId: string): Promise<CommentView[]> {
     authorName: row.author?.full_name ?? "Unknown",
     authorAvatarUrl: row.author?.avatar_url ?? null,
     timeLabel: relativeTime(row.created_at),
+    timeTitle: dateTimeLabel(row.created_at),
   }));
 }
 
@@ -252,6 +254,7 @@ export type DashboardData = {
     action: string;
     reference: string;
     timeLabel: string;
+    timeTitle: string;
   }[];
 };
 
@@ -312,6 +315,7 @@ export async function getDashboard(): Promise<DashboardData> {
           action: t.status === "closed" ? "closed" : "resolved",
           reference: t.reference,
           timeLabel: relativeTime(t.updatedAt),
+          timeTitle: dateTimeLabel(t.updatedAt),
         };
       }
       return {
@@ -320,6 +324,7 @@ export async function getDashboard(): Promise<DashboardData> {
         action: "opened",
         reference: t.reference,
         timeLabel: relativeTime(t.createdAt),
+        timeTitle: dateTimeLabel(t.createdAt),
       };
     });
 

@@ -10,7 +10,7 @@ import { markAllNotificationsRead } from "@/app/(app)/actions";
 import { useSession } from "@/components/providers/session-provider";
 import { Button } from "@/components/ui/button";
 import { NotificationItem } from "@/components/ui/notification-item";
-import { relativeTime } from "@/lib/format";
+import { dateTimeLabel, relativeTime } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 
 type NotificationRow = {
@@ -143,6 +143,7 @@ export function NotificationsBell() {
                   <NotificationItem
                     read={row.read}
                     timeLabel={relativeTime(row.created_at)}
+                    timeTitle={dateTimeLabel(row.created_at)}
                     message={withTicketLink(row.body, row.reference)}
                   />
                 </div>

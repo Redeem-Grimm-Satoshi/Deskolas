@@ -9,6 +9,7 @@ const base = {
   priority: "medium" as const,
   category: "Software and IDE",
   updatedLabel: "1h ago",
+  updatedTitle: "Jul 9, 06:40 PM",
   href: "/tickets/ps-0003",
 };
 
