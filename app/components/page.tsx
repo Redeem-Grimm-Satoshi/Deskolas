@@ -150,6 +150,7 @@ function Library() {
             priority="high"
             category="Network and Access"
             updatedLabel="2h ago"
+            updatedTitle="Jul 9, 05:40 PM"
             href="#"
           />
           <TicketCard
@@ -160,6 +161,7 @@ function Library() {
             category="Software and IDE"
             assignee={{ name: "Andre T." }}
             updatedLabel="1h ago"
+            updatedTitle="Jul 9, 06:40 PM"
             href="#"
           />
           <TicketCard
@@ -170,6 +172,7 @@ function Library() {
             category="Hardware and AV"
             assignee={{ name: "Andre T." }}
             updatedLabel="3h ago"
+            updatedTitle="Jul 9, 04:40 PM"
             href="#"
           />
           <TicketCard
@@ -179,6 +182,7 @@ function Library() {
             priority="medium"
             category="Network and Access"
             updatedLabel="1d ago"
+            updatedTitle="Jul 8, 05:40 PM"
             href="#"
           />
         </div>

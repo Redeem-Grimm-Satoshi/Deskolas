@@ -22,6 +22,7 @@ type TicketCardProps = {
   category: TicketCategory | string;
   assignee?: Assignee | null;
   updatedLabel: string;
+  updatedTitle: string;
   href: string;
 };
 
@@ -42,6 +43,7 @@ export function TicketCard({
   category,
   assignee,
   updatedLabel,
+  updatedTitle,
   href,
 }: TicketCardProps) {
   const isClosed = status === "closed";
@@ -94,7 +96,10 @@ export function TicketCard({
           ) : (
             <span className="text-text-muted">Unassigned</span>
           )}
-          <span className="text-text-muted ml-auto shrink-0">
+          <span
+            className="text-text-muted ml-auto shrink-0"
+            title={updatedTitle}
+          >
             {updatedLabel}
           </span>
         </div>

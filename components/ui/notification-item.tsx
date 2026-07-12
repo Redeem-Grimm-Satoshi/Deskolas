@@ -7,11 +7,13 @@ export function NotificationItem({
   read,
   message,
   timeLabel,
+  timeTitle,
   className,
 }: {
   read: boolean;
   message: React.ReactNode;
   timeLabel: string;
+  timeTitle?: string;
   className?: string;
 }) {
   return (
@@ -38,7 +40,10 @@ export function NotificationItem({
         >
           {message}
         </p>
-        <p className="text-text-muted mt-0.5 text-[12px] leading-4">
+        <p
+          className="text-text-muted mt-0.5 text-[12px] leading-4"
+          title={timeTitle}
+        >
           {timeLabel}
         </p>
       </div>

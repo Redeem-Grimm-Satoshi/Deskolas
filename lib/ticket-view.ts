@@ -1,4 +1,4 @@
-import { relativeTime } from "@/lib/format";
+import { dateTimeLabel, relativeTime } from "@/lib/format";
 import type { TicketView } from "@/lib/queries";
 import type { TicketPriority, TicketStatus } from "@/lib/tickets";
 
@@ -46,6 +46,7 @@ export function ticketCardProps(ticket: TicketView) {
       ? { name: ticket.assigneeName, src: ticket.assigneeAvatarUrl }
       : null,
     updatedLabel: relativeTime(ticket.updatedAt),
+    updatedTitle: dateTimeLabel(ticket.updatedAt),
     href: `/tickets/${ticket.reference}`,
   };
 }
