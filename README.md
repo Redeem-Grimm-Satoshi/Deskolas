@@ -7,10 +7,6 @@ Learners Hub knowledge base.
 
 <img width="1440" height="900" alt="Ticket queue" src="https://github.com/user-attachments/assets/dff05e23-efcb-4372-a996-594e2e348016" />
 
-## Design System
-
-[Deskolas Design System.pdf](https://github.com/user-attachments/files/29555947/Deskolas.Design.System.pdf)
-
 ## Stack
 
 - Next.js (App Router) and TypeScript, server components by default
@@ -23,23 +19,28 @@ Learners Hub knowledge base.
 See `CLAUDE.md` for the full locked stack and the rules that keep the codebase
 consistent.
 
-## Setup
+## Getting started
 
 Requires Node 20 or newer.
 
-```
+```bash
+git clone https://github.com/Redeem-Grimm-Satoshi/Deskolas.git
+cd Deskolas
 npm install
 npm run dev
 ```
 
-The app needs a `.env.local` with the Supabase values before it will run. The
-project owner pulls it from Vercel (`vercel env pull .env.local`); teammates ask
-the owner for the values (see Contributing for the first time below). Then open
-http://localhost:3000.
+The app needs a `.env.local` with the Supabase values before it will run. They
+are intentionally not in the repository: the project owner pulls them from
+Vercel (`vercel env pull .env.local`), and teammates ask the owner for them.
+
+Then open http://localhost:3000. The design system lives at
+http://localhost:3000/components and is worth a tour before touching code: it
+shows every building block the screens are made of.
 
 ## Environment
 
-Every required variable is documented in `.env.example`. The short version:
+Every variable is documented in `.env.example`. The short version:
 
 - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`: public, safe in
   the browser.
@@ -50,7 +51,8 @@ Every required variable is documented in `.env.example`. The short version:
   knowledge base handoff (`docs/kb-integration.md`). Optional; the app runs
   without them and promote falls back to flagging locally.
 
-In production these live in the Vercel project settings, not in a committed file.
+In production these live in the Vercel project settings, not in a committed
+file.
 
 ## Commands
 
@@ -66,7 +68,7 @@ npm run format       # prettier write
 
 All of these pass before any change is considered done.
 
-## Supabase
+## Database
 
 Migrations, RLS policies, and the seed script live in `supabase/`. There is one
 hosted database, provisioned through the Supabase integration on Vercel, shared
@@ -92,66 +94,49 @@ review.
 
 ## Contributing for the first time
 
-Welcome! If this is your first contribution, follow these steps to get your local development environment ready.
+Welcome! Work through Getting started above first, and ask the project owner
+for one more thing: an invitation to the app itself plus demo sign-in
+credentials, so you can use the screens you are changing. Then:
 
-1. Clone the repository and install dependencies. Make sure you have Node.js 20 or newer installed.
+1. Choose an issue labeled **easy fix**. Leave a comment on the issue so others
+   know you are working on it.
 
-   ```bash
-   git clone <repository-url>
-   cd <repository-folder>
-   npm install
-   ```
+2. Create a branch from the latest `main`.
 
-2. Ask the project owner for two things before running the app:
-   - The `.env.local` file. The app requires Supabase keys that are intentionally not included in the repository.
-   - An invitation to the application and demo sign in credentials.
+   ```bash
+   git checkout main
+   git pull
+   git checkout -b fix/issue-13-placeholders
+   ```
 
-3. Start the development server.
+3. Make your change, then run the quality checks. All of them must pass; the
+   pre-commit hook also insists.
 
-   ```bash
-   npm run dev
-   ```
+   ```bash
+   npm run lint
+   npm run typecheck
+   npm run test
+   npm run build
+   ```
 
-   Then open <http://localhost:3000> in your browser.
+4. Open a pull request that references the issue number, for example
+   `Closes #13` (no space after the `#`, so GitHub links and closes the issue
+   automatically). One pull request per issue. Never push directly to `main`.
 
-4. Visit <http://localhost:3000/components> to explore the design system before making changes. It contains the building blocks used throughout the application.
+5. Read `CONTRIBUTING.md` and `CLAUDE.md` before contributing. The two rules
+   that surprise people:
+   - Design tokens only. No raw hex colors and no one-off pixel sizes.
+   - No em dashes anywhere. The commit hook and CI enforce this.
 
-5. Choose an issue labeled **easy fix**. Leave a comment on the issue so others know you are working on it. Then create a branch from `main`.
-
-   ```bash
-   git checkout main
-   git pull
-   git checkout -b fix/issue-13-placeholders
-   ```
-
-6. Before opening a pull request, run the quality checks.
-
-   ```bash
-   npm run lint
-   npm run typecheck
-   npm run test
-   npm run build
-   ```
-
-   All commands must pass. The pre commit hook also requires them to pass.
-
-7. Open a pull request that references the issue number. For example:
-
-   ```
-   Closes #13
-   ```
-
-   Create one pull request per issue. Never push directly to `main`.
-
-8. Read `CONTRIBUTING.md` and `CLAUDE.md` before contributing. Pay special attention to these project rules:
-   - Use design tokens only. Do not use raw hex color values or one off pixel sizes.
-   - Do not use em dashes. The commit hook enforces this.
-   
 ## Documentation
 
 - `CLAUDE.md`: locked stack, commands, definition of done, guardrails.
-- `CONTRIBUTING.md`: branching, commits, PR rules, how to add a feature on-system.
-- `design-guidelines.md`: the living design contract (tokens, components, rules).
+- `CONTRIBUTING.md`: branching, commits, PR rules, how to add a feature.
+- `design-guidelines.md`: the living design contract (tokens, components,
+  rules).
+- `DOCUMENTATION.md`: how the app is built and the change log.
+- [Deskolas Design System.pdf](https://github.com/user-attachments/files/29555947/Deskolas.Design.System.pdf):
+  the visual design reference.
 
 The design intent and data model live in the handoff bundle one level up
 (`Design_Brief.md`, `Overview.md`, `COMPONENT_INVENTORY.md`, and `screens/`).
