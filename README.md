@@ -80,6 +80,63 @@ app is the repository root, so the Vercel project root directory is the default
 (no subfolder). Branch protection on `main` requires green CI and one approving
 review.
 
+## Contributing for the first time
+
+Welcome! If this is your first contribution, follow these steps to get your local development environment ready.
+
+1. Clone the repository and install dependencies. Make sure you have Node.js 20 or newer installed.
+
+   ```bash
+   git clone <repository-url>
+   cd <repository-folder>
+   npm install
+   ```
+
+2. Ask the project owner for two things before running the app:
+   - The `.env.local` file. The app requires Supabase keys that are intentionally not included in the repository.
+   - An invitation to the application and demo sign in credentials.
+
+3. Start the development server.
+
+   ```bash
+   npm run dev
+   ```
+
+   Then open <http://localhost:3000> in your browser.
+
+4. Visit <http://localhost:3000/components> to explore the design system before making changes. It contains the building blocks used throughout the application.
+
+5. Choose an issue labeled **easy fix**. Leave a comment on the issue so others know you are working on it. Then create a branch from `main`.
+
+   ```bash
+   git checkout main
+   git pull
+   git checkout -b fix/issue-13-placeholders
+   ```
+
+6. Before opening a pull request, run the quality checks.
+
+   ```bash
+   npm run lint
+   npm run typecheck
+   npm run test
+   npm run build
+   ```
+
+   All commands must pass. The pre commit hook also requires them to pass.
+
+7. Open a pull request that references the issue number. For example:
+
+   ```
+   Closes #13
+   ```
+
+   Create one pull request per issue. Never push directly to `main`.
+
+8. Read `CONTRIBUTING.md` and `CLAUDE.md` before contributing. Pay special attention to these project rules:
+   - Use design tokens only. Do not use raw hex color values or one off pixel sizes.
+   - Do not use em dashes. The commit hook enforces this.
+   
 ## Documentation
 
 - `CLAUDE.md`: locked stack, commands, definition of done, guardrails.
