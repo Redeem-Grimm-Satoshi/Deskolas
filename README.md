@@ -130,6 +130,7 @@ credentials, so you can use the screens you are changing. Then:
 
 ## Documentation
 
+- `ROADMAP.md`: where the project is and where it goes next. Start here.
 - `CLAUDE.md`: locked stack, commands, definition of done, guardrails.
 - `CONTRIBUTING.md`: branching, commits, PR rules, how to add a feature.
 - `design-guidelines.md`: the living design contract (tokens, components,
