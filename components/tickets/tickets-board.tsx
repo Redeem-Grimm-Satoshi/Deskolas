@@ -1,6 +1,7 @@
 "use client";
 
 import { Inbox } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 
 import { AppTopBar } from "@/components/app/app-top-bar";
@@ -44,11 +45,65 @@ const priorityFilterOptions = [
   })),
 ];
 
+const STATUS_VALUES = new Set<string>(STATUS_TABS.map((tab) => tab.value));
+const CATEGORY_VALUES = new Set<string>(TICKET_CATEGORIES);
+const PRIORITY_VALUES = new Set<string>(TICKET_PRIORITIES);
+
+function readParam(params: URLSearchParams, key: string, allowed: Set<string>) {
+  const value = params.get(key);
+  return value && allowed.has(value) ? value : "all";
+}
+
+// The URL is the source of truth for the filters so a filtered queue survives
+// a refresh and can be shared. Only non-default values are written, so a
+// plain /tickets stays clean.
 export function TicketsBoard({ tickets }: { tickets: TicketView[] }) {
-  const [status, setStatus] = React.useState<StatusFilter>("all");
-  const [category, setCategory] = React.useState("all");
-  const [priority, setPriority] = React.useState("all");
-  const [query, setQuery] = React.useState("");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const status = readParam(
+    searchParams,
+    "status",
+    STATUS_VALUES,
+  ) as StatusFilter;
+  const category = readParam(searchParams, "category", CATEGORY_VALUES);
+  const priority = readParam(searchParams, "priority", PRIORITY_VALUES);
+  const urlQuery = searchParams.get("q") ?? "";
+
+  // Typing stays in local state so it feels instant; the URL catches up after
+  // a short pause.
+  const [query, setQuery] = React.useState(urlQuery);
+
+  const replaceParams = React.useCallback(
+    (mutate: (params: URLSearchParams) => void) => {
+      const params = new URLSearchParams(searchParams);
+      mutate(params);
+      const search = params.toString();
+      router.replace(search ? `${pathname}?${search}` : pathname, {
+        scroll: false,
+      });
+    },
+    [pathname, router, searchParams],
+  );
+
+  function updateParam(key: string, value: string) {
+    replaceParams((params) => {
+      if (value === "all" || value === "") params.delete(key);
+      else params.set(key, value);
+    });
+  }
+
+  React.useEffect(() => {
+    if (query === urlQuery) return;
+    const timer = setTimeout(() => {
+      replaceParams((params) => {
+        if (query) params.set("q", query);
+        else params.delete("q");
+      });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query, urlQuery, replaceParams]);
 
   const filtered = sortTickets(
     tickets.filter((ticket) => {
@@ -67,10 +122,12 @@ export function TicketsBoard({ tickets }: { tickets: TicketView[] }) {
   ).length;
 
   function clearFilters() {
-    setStatus("all");
-    setCategory("all");
-    setPriority("all");
     setQuery("");
+    replaceParams((params) => {
+      for (const key of ["status", "category", "priority", "q"]) {
+        params.delete(key);
+      }
+    });
   }
 
   const filtersActive =
@@ -97,20 +154,20 @@ export function TicketsBoard({ tickets }: { tickets: TicketView[] }) {
           <SegmentedTabs
             options={STATUS_TABS}
             value={status}
-            onChange={setStatus}
+            onChange={(value) => updateParam("status", value)}
           />
           <div className="flex gap-2">
             <Select
               aria-label="Filter by category"
               options={categoryFilterOptions}
               value={category}
-              onValueChange={setCategory}
+              onValueChange={(value) => updateParam("category", value)}
               className="w-44"
             />
             <Select
               options={priorityFilterOptions}
               value={priority}
-              onValueChange={setPriority}
+              onValueChange={(value) => updateParam("priority", value)}
               className="w-40"
             />
           </div>
