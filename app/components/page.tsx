@@ -12,6 +12,7 @@ import {
 import * as React from "react";
 
 import { TicketCard } from "@/components/tickets/ticket-card";
+import { TourCard } from "@/components/tour/tour-card";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -275,6 +276,19 @@ function Library() {
             }
           />
         </div>
+      </Section>
+
+      <Section title="Tour card">
+        <TourCard
+          label="Tour"
+          title="Read a ticket at a glance"
+          body="The colored spine is the status and the stub is the reference. Open a ticket to claim it, add a comment, and resolve it once the fix is confirmed."
+          index={3}
+          total={10}
+          onNext={() => undefined}
+          onBack={() => undefined}
+          onSkip={() => undefined}
+        />
       </Section>
 
       <Section title="Dialog and toast">

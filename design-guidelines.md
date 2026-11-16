@@ -204,6 +204,7 @@ Build the library to match the Phase 2 style sheet (see `Deskolas Design System.
 | Toggle                  | on, off                                  | for settings; accent when on.                                                                 |
 | Avatar                  | initials, image                          | `radius-full`, neutral surface for initials.                                                  |
 | Notification item       | unread, read                             | unread dot in accent.                                                                         |
+| Tour card               | first, middle, last step                 | floating layer over a spotlight scrim; neutral progress; one primary (Next or Done).          |
 
 ### Adding a new component on-system
 
@@ -223,6 +224,10 @@ Build the library to match the Phase 2 style sheet (see `Deskolas Design System.
 - Errors say what happened then what to do, in one line, no "Error:" prefix: "That email is not on the cohort list. Use your Per Scholas address."
 - Empty states invite, not apologize: "Nothing open right now. Nice." / "Open your first ticket to get started."
 - Save "Stuck? Deskolas it." for one or two personality moments (onboarding, an empty state). Everywhere else, plain.
+
+### The guided tour
+
+The first-run tour (`components/tour`) spotlights real UI, never screenshots or illustrations. The scrim is the dialog scrim token, the spotlight is a `radius-card` cut-out with a strong hairline, and the step card is a floating layer like any popover: `surface`, hairline, soft neutral shadow. Progress is a neutral bar plus mono tabular numerals; the only accent on screen is the primary button. Step copy follows the voice rules above: a short sentence-case title that says what the thing is for, one or two plain sentences of body. Each step is one entry in the registry in `lib/tour.ts` pointing at a `data-tour` anchor; a feature that ships without a step is invisible to new users.
 
 ---
 

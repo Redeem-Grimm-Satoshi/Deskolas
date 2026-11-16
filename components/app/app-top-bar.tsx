@@ -32,7 +32,11 @@ function MobileNavTrigger() {
         <Dialog.Content
           aria-label="Navigation"
           onClick={(event) => {
-            if ((event.target as HTMLElement).closest("a")) setOpen(false);
+            if (
+              (event.target as HTMLElement).closest("a, [data-tour-launch]")
+            ) {
+              setOpen(false);
+            }
           }}
           className="fixed inset-y-0 left-0 z-50 motion-safe:data-[state=open]:animate-[layer-in_220ms_ease-out] lg:hidden"
         >
@@ -66,7 +70,11 @@ export function AppTopBar({
     >
       <MobileNavTrigger />
       <h1 className="text-heading text-text shrink-0 font-semibold">{title}</h1>
-      {search ? <div className="hidden min-w-0 sm:block">{search}</div> : null}
+      {search ? (
+        <div className="hidden min-w-0 sm:block" data-tour="search">
+          {search}
+        </div>
+      ) : null}
       <div className="ml-auto flex shrink-0 items-center gap-3">
         {actions}
         <ThemeToggle />

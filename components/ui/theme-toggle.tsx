@@ -15,6 +15,7 @@ export function ThemeToggle() {
     <Button
       variant="secondary"
       iconOnly
+      data-tour="theme"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >
       <Moon className="light:hidden size-4" strokeWidth={1.5} />

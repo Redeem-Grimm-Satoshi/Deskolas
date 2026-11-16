@@ -13,6 +13,7 @@ export function SidebarNavItem({
   active = false,
   count,
   external = false,
+  tour,
 }: {
   icon: LucideIcon;
   label: string;
@@ -20,11 +21,14 @@ export function SidebarNavItem({
   active?: boolean;
   count?: number;
   external?: boolean;
+  /** Anchor id for the guided tour (`data-tour`). */
+  tour?: string;
 }) {
   return (
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
+      data-tour={tour}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
       className={cn(

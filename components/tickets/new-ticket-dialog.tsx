@@ -54,7 +54,7 @@ export function NewTicketButton() {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
+      <Button onClick={() => setOpen(true)} data-tour="new-ticket">
         <Plus className="size-4" strokeWidth={1.5} />
         New ticket
       </Button>
