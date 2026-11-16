@@ -106,6 +106,7 @@ export function NotificationsBell() {
           iconOnly
           aria-label="Notifications"
           className="relative"
+          data-tour="notifications"
         >
           <Bell className="size-[18px]" strokeWidth={1.5} />
           {hasUnread ? (

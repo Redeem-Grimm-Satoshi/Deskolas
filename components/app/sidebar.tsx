@@ -13,26 +13,43 @@ import { usePathname } from "next/navigation";
 import { useSession } from "@/components/providers/session-provider";
 import { Logo } from "@/components/ui/logo";
 import { SidebarNavItem } from "@/components/ui/sidebar-nav-item";
+import { TourLauncher } from "@/components/tour/tour-launcher";
 import { UserMenu } from "./user-menu";
 
 type NavItem = {
   icon: LucideIcon;
   label: string;
   href: string;
+  tour: string;
 };
 
 // The open board and My tickets are for everyone: anyone can browse and claim.
 // Admins additionally get the oversight views (Dashboard, People).
 const MEMBER_NAV: NavItem[] = [
-  { icon: Ticket, label: "Tickets", href: "/tickets" },
-  { icon: Inbox, label: "My tickets", href: "/my-tickets" },
+  { icon: Ticket, label: "Tickets", href: "/tickets", tour: "nav-tickets" },
+  {
+    icon: Inbox,
+    label: "My tickets",
+    href: "/my-tickets",
+    tour: "nav-my-tickets",
+  },
 ];
 
 const ADMIN_NAV: NavItem[] = [
-  { icon: Ticket, label: "Tickets", href: "/tickets" },
-  { icon: LayoutGrid, label: "Dashboard", href: "/dashboard" },
-  { icon: Inbox, label: "My tickets", href: "/my-tickets" },
-  { icon: Users, label: "People", href: "/people" },
+  { icon: Ticket, label: "Tickets", href: "/tickets", tour: "nav-tickets" },
+  {
+    icon: LayoutGrid,
+    label: "Dashboard",
+    href: "/dashboard",
+    tour: "nav-dashboard",
+  },
+  {
+    icon: Inbox,
+    label: "My tickets",
+    href: "/my-tickets",
+    tour: "nav-my-tickets",
+  },
+  { icon: Users, label: "People", href: "/people", tour: "nav-people" },
 ];
 
 export function Sidebar() {
@@ -52,6 +69,7 @@ export function Sidebar() {
             icon={item.icon}
             label={item.label}
             href={item.href}
+            tour={item.tour}
             active={
               pathname === item.href || pathname.startsWith(`${item.href}/`)
             }
@@ -62,7 +80,9 @@ export function Sidebar() {
           label="Knowledge Base"
           href="https://learners-hub.bolt.host/"
           external
+          tour="nav-kb"
         />
+        <TourLauncher />
       </nav>
       <div className="border-border border-t p-3">
         <UserMenu />

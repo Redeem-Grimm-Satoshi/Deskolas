@@ -150,7 +150,10 @@ export function TicketsBoard({ tickets }: { tickets: TicketView[] }) {
         actions={<NewTicketButton />}
       />
       <div className="flex flex-col gap-4 p-6 max-sm:p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div
+          className="flex flex-wrap items-center justify-between gap-3"
+          data-tour="queue-filters"
+        >
           <SegmentedTabs
             options={STATUS_TABS}
             value={status}
@@ -180,8 +183,12 @@ export function TicketsBoard({ tickets }: { tickets: TicketView[] }) {
 
         {filtered.length > 0 ? (
           <div className="flex flex-col gap-2">
-            {filtered.map((ticket) => (
-              <TicketCard key={ticket.id} {...ticketCardProps(ticket)} />
+            {filtered.map((ticket, position) => (
+              <TicketCard
+                key={ticket.id}
+                {...ticketCardProps(ticket)}
+                tour={position === 0 ? "ticket-card" : undefined}
+              />
             ))}
           </div>
         ) : (

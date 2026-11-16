@@ -64,8 +64,10 @@ components/
   ui/            token-themed primitives (button, input, select, ticket bits...)
   tickets/       feature components (ticket card, new-ticket dialog, promote)
   app/           shell pieces (sidebar, top bar, user menu, notifications)
+  tour/          first-run guided tour (provider, overlay, step card, launcher)
   providers/     theme and session providers
 lib/
+  tour.ts        the tour step registry and per-user "seen" storage
   queries.ts     server-side data access (RLS runs on every query)
   tickets.ts     roles, status, priority, category vocabulary
   ticket-view.ts sort and card-prop helpers, spine color map
@@ -203,6 +205,30 @@ Demo logins after `npm run db:seed`: any cohort email with the password
 `deskolas123`. Admins are `andre@cohort.dev` and `maria@cohort.dev`; members are
 `priya@`, `redeem@`, and `jose@`.
 
+## Guided tour
+
+New users get a short walkthrough of the real screens the first time they
+open the app, and can replay it from the sidebar at any time.
+
+- First visit: a welcome dialog offers "Take the tour" or "Skip for now".
+  Either choice is remembered, so the prompt shows once.
+- The tour is a spotlight overlay: the page dims, the element for the current
+  step is cut out, and a step card sits next to it with Back, Next, and Skip.
+  Escape ends it; the arrow keys move between steps. On phones the card is a
+  bottom sheet.
+- Steps are a registry in `lib/tour.ts`. Each step names a `data-tour` anchor,
+  optionally the route it lives on and the roles who get it. The overlay
+  navigates to the route when needed and skips any step whose anchor is not
+  rendered (role-gated, hidden at that breakpoint, or an empty list), so the
+  same registry serves admins, members, desktop, and mobile.
+- Adaptive to new features: the per-user record (localStorage, keyed by user
+  id) stores the step ids seen. When a step is added later, the sidebar
+  launcher becomes "What's new" with a count and runs only the unseen steps.
+  To put a feature in the tour, add a `data-tour` attribute to its element and
+  one entry to `TOUR_STEPS`; nothing else changes.
+- The step card is in the `/components` library so copy and spacing can be
+  checked against the tokens without running the tour.
+
 ## Conventions
 
 - Server components by default; `"use client"` only where interaction needs it.
@@ -253,3 +279,8 @@ Demo logins after `npm run db:seed`: any cohort email with the password
   retry and backoff), an `/api/kb/published` webhook records the published
   article URL back, and the ticket shows the Promote, Sent, and In Knowledge
   Base states. All behind server-only env vars; see `docs/kb-integration.md`.
+- 2026-11-15, guided tour: a first-run welcome prompt and spotlight walkthrough
+  of the real screens, replayable from a sidebar launcher that turns into
+  "What's new" when steps are added later. Steps are a registry in
+  `lib/tour.ts` pointing at `data-tour` anchors; role-gated and off-screen
+  steps skip themselves. Step card added to the component library.

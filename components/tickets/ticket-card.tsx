@@ -24,6 +24,8 @@ type TicketCardProps = {
   updatedLabel: string;
   updatedTitle: string;
   href: string;
+  /** Anchor id for the guided tour (`data-tour`). */
+  tour?: string;
 };
 
 function Separator() {
@@ -45,12 +47,14 @@ export function TicketCard({
   updatedLabel,
   updatedTitle,
   href,
+  tour,
 }: TicketCardProps) {
   const isClosed = status === "closed";
 
   return (
     <Link
       href={href}
+      data-tour={tour}
       className={cn(
         "rounded-card border-border bg-surface flex items-stretch gap-3.5 border px-4 py-3.5",
         "hover:border-border-strong transition-colors duration-150 ease-out",

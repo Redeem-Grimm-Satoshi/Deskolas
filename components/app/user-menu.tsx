@@ -37,6 +37,7 @@ export function UserMenu() {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger
+        data-tour="user-menu"
         className={cn(
           "rounded-control hover:bg-hover-surface flex w-full items-center gap-2.5 p-2 text-left transition-colors",
           focusRing,
