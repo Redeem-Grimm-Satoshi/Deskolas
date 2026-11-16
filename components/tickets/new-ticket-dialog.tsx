@@ -31,8 +31,26 @@ const priorityOptions = TICKET_PRIORITIES.map((value) => ({
 
 type Errors = Partial<Record<"title" | "description" | "category", string>>;
 
+type Draft = {
+  title: string;
+  description: string;
+  category: string;
+  priority: TicketPriority;
+};
+
+const EMPTY_DRAFT: Draft = {
+  title: "",
+  description: "",
+  category: "",
+  priority: "low",
+};
+
+// The draft lives on the button, not the dialog, so closing the dialog (Escape,
+// clicking outside, Cancel) keeps whatever was typed. Only a successful submit
+// clears it.
 export function NewTicketButton() {
   const [open, setOpen] = React.useState(false);
+  const [draft, setDraft] = React.useState<Draft>(EMPTY_DRAFT);
 
   return (
     <>
@@ -40,7 +58,13 @@ export function NewTicketButton() {
         <Plus className="size-4" strokeWidth={1.5} />
         New ticket
       </Button>
-      <NewTicketDialog open={open} onOpenChange={setOpen} />
+      <NewTicketDialog
+        open={open}
+        onOpenChange={setOpen}
+        draft={draft}
+        onDraftChange={setDraft}
+        onSubmitted={() => setDraft(EMPTY_DRAFT)}
+      />
     </>
   );
 }
@@ -48,27 +72,26 @@ export function NewTicketButton() {
 function NewTicketDialog({
   open,
   onOpenChange,
+  draft,
+  onDraftChange,
+  onSubmitted,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  draft: Draft;
+  onDraftChange: (draft: Draft) => void;
+  onSubmitted: () => void;
 }) {
   const { user } = useSession();
   const toast = useToast();
   const router = useRouter();
 
-  const [title, setTitle] = React.useState("");
-  const [description, setDescription] = React.useState("");
-  const [category, setCategory] = React.useState("");
-  const [priority, setPriority] = React.useState<TicketPriority>("low");
+  const { title, description, category, priority } = draft;
   const [errors, setErrors] = React.useState<Errors>({});
   const [submitting, setSubmitting] = React.useState(false);
 
-  function reset() {
-    setTitle("");
-    setDescription("");
-    setCategory("");
-    setPriority("low");
-    setErrors({});
+  function patch(changes: Partial<Draft>) {
+    onDraftChange({ ...draft, ...changes });
   }
 
   async function handleSubmit() {
@@ -106,7 +129,8 @@ function NewTicketDialog({
       tone: "success",
       message: `Ticket ${outcome.reference} submitted`,
     });
-    reset();
+    setErrors({});
+    onSubmitted();
     onOpenChange(false);
     router.refresh();
   }
@@ -115,7 +139,7 @@ function NewTicketDialog({
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        if (!next) reset();
+        if (!next) setErrors({});
         onOpenChange(next);
       }}
       title="New ticket"
@@ -143,14 +167,14 @@ function NewTicketDialog({
           fieldSize="dialog"
           placeholder="Short summary of the problem"
           value={title}
-          onChange={(event) => setTitle(event.target.value)}
+          onChange={(event) => patch({ title: event.target.value })}
           error={errors.title}
         />
         <Textarea
           label="Description"
           placeholder="What happened, what you expected, and what you have already tried"
           value={description}
-          onChange={(event) => setDescription(event.target.value)}
+          onChange={(event) => patch({ description: event.target.value })}
           error={errors.description}
           className="min-h-24"
         />
@@ -161,14 +185,16 @@ function NewTicketDialog({
             placeholder="Select"
             options={categoryOptions}
             value={category}
-            onValueChange={setCategory}
+            onValueChange={(value) => patch({ category: value })}
           />
           <Select
             label="Priority"
             fieldSize="dialog"
             options={priorityOptions}
             value={priority}
-            onValueChange={(value) => setPriority(value as TicketPriority)}
+            onValueChange={(value) =>
+              patch({ priority: value as TicketPriority })
+            }
           />
         </div>
         {errors.category ? (
