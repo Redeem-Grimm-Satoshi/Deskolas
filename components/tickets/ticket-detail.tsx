@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, RotateCcw } from "lucide-react";
+import { ChevronLeft, Link2, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -140,6 +140,15 @@ export function TicketDetail({
     await run(setTicketStatus(ticket.id, next), message);
   }
 
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast({ message: "Link copied" });
+    } catch {
+      toast({ message: "Could not copy the link" });
+    }
+  }
+
   async function claim() {
     setStatus((s) => (s === "new" ? "in_progress" : s));
     setAssigneeId(currentUserId);
@@ -192,6 +201,14 @@ export function TicketDetail({
         <span className="text-text-muted font-mono text-[13px]">
           / {ticket.reference}
         </span>
+        <Button
+          variant="ghost"
+          iconOnly
+          aria-label="Copy link to this ticket"
+          onClick={copyLink}
+        >
+          <Link2 className="size-[18px]" strokeWidth={1.5} />
+        </Button>
         <div className="ml-auto flex items-center gap-3">
           <ThemeToggle />
           <NotificationsBell />
